@@ -8,6 +8,7 @@
     --secondary-color: #8b5cf6;
     --secondary-dark: #7c3aed;
     --accent-color: #ec4899;
+    --accent-purple: #8b5cf6;
     --success-color: #10b981;
     --danger-color: #ef4444;
     --warning-color: #f59e0b;
@@ -395,15 +396,6 @@ body {
 .icon-btn:active {
     transform: scale(0.95);
 }
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
-    font-size: 1.125rem;
-}
-
-.icon-btn:hover {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-}
 
 .filter-controls, .active-filter {
     margin-bottom: 1.5rem;
@@ -479,6 +471,63 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+}
+
+.btn-filter-toggle {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.btn-filter-toggle:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-filter-toggle.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.advanced-filters {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.advanced-filters input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    height: 6px;
+    outline: none;
+}
+
+.advanced-filters input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+}
+
+.advanced-filters input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: none;
 }
 
 .view-toggle {
@@ -1539,6 +1588,77 @@ body {
     50% {
         box-shadow: var(--shadow-xl), 0 0 0 10px rgba(139, 92, 246, 0);
     }
+}
+
+.fab-help {
+    position: fixed;
+    bottom: 2rem;
+    right: 5rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-base);
+    z-index: 100;
+}
+
+.fab-help:hover {
+    transform: scale(1.1);
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Keyboard shortcuts styling */
+.shortcuts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.shortcut-item kbd {
+    background: var(--bg-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    font-family: monospace;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 0 var(--border-color);
+}
+
+.shortcut-item span {
+    flex: 1;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Copy button hover effect */
+.btn-copy-color:hover {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Share button hover effect */
+.btn-share-recipe:hover {
+    background: #7c3aed !important;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 /* ========================================

@@ -54,6 +54,7 @@
                     <button class="btn-secondary" id="clear-all-btn" style="flex: 1; font-size: 0.875rem; padding: 0.5rem; background: rgba(244, 67, 54, 0.2); border-color: rgba(244, 67, 54, 0.3);">
                         🗑️ Clear
                     </button>
+                    <input type="file" id="import-file-input" accept=".json" style="display: none;">
                 </div>
 
                 <!-- Filament List -->
@@ -76,6 +77,20 @@
                         <input type="checkbox" id="filter-4way" checked>
                         <span>4-way mixes <span class="hint-text" id="combo-count-4">(0)</span></span>
                     </label>
+                </div>
+
+                <!-- Mix Quality Settings -->
+                <div class="filter-controls">
+                    <h3>Quality Settings <span class="info-icon" title="Higher quality = more color variations">ℹ️</span></h3>
+                    <label for="mix-granularity" style="font-size: 0.875rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                        2-way Mix Granularity
+                    </label>
+                    <select id="mix-granularity" style="width: 100%; padding: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.875rem;">
+                        <option value="5">Standard (5% steps, ~19 colors)</option>
+                        <option value="10">Fast (10% steps, ~9 colors)</option>
+                        <option value="2">High Quality (2% steps, ~49 colors)</option>
+                        <option value="1">Ultra (1% steps, ~99 colors)</option>
+                    </select>
                 </div>
 
                 <!-- Active Filament Filter -->
@@ -110,6 +125,41 @@
                         </label>
                         <input type="range" id="lightness-slider" min="0" max="100" value="50">
                         <span id="lightness-value" style="min-width: 3rem; text-align: right; font-weight: 600;">50%</span>
+                    </div>
+
+                    <button class="btn-filter-toggle" id="advanced-filter-toggle" title="Advanced Color Filters">
+                        🎨 Filters
+                    </button>
+
+                    <button class="btn-filter-toggle" id="export-palette-btn" title="Export Color Palette">
+                        📤 Export
+                    </button>
+                </div>
+
+                <!-- Advanced Filter Panel -->
+                <div class="advanced-filters" id="advanced-filters" style="display: none;">
+                    <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">Hue Range</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="range" id="hue-min" min="0" max="360" value="0" style="flex: 1;">
+                                <span id="hue-min-val" style="min-width: 3rem; font-size: 0.875rem;">0°</span>
+                                <span style="font-size: 0.875rem;">to</span>
+                                <input type="range" id="hue-max" min="0" max="360" value="360" style="flex: 1;">
+                                <span id="hue-max-val" style="min-width: 3rem; font-size: 0.875rem;">360°</span>
+                            </div>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">Saturation Range</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="range" id="sat-min" min="0" max="100" value="0" style="flex: 1;">
+                                <span id="sat-min-val" style="min-width: 3rem; font-size: 0.875rem;">0%</span>
+                                <span style="font-size: 0.875rem;">to</span>
+                                <input type="range" id="sat-max" min="0" max="100" value="100" style="flex: 1;">
+                                <span id="sat-max-val" style="min-width: 3rem; font-size: 0.875rem;">100%</span>
+                            </div>
+                        </div>
+                        <button class="btn-secondary" id="reset-filters" style="align-self: flex-end; white-space: nowrap;">Reset Filters</button>
                     </div>
                 </div>
                 
@@ -320,6 +370,9 @@
     <!-- Floating Action Button -->
     <button class="fab" id="fab-target-color" title="Find a target color">🎯</button>
 
+    <!-- Help Button -->
+    <button class="fab-help" id="fab-help" title="Keyboard shortcuts">⌨️</button>
+
     <!-- Keyboard Shortcuts Help -->
     <div class="modal" id="shortcuts-modal">
         <div class="modal-content" style="max-width: 500px;">
@@ -357,6 +410,8 @@
     <script src="js/storage.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/color-mixer.js"></script>
+    <script src="js/delta-e.js"></script>
+    <script src="js/color-names.js"></script>
     <script src="js/color-visualizer.js"></script>
     <script src="js/filament-manager.js"></script>
     <script src="js/app.js"></script>

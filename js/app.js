@@ -525,9 +525,9 @@ const App = {
         }
         
         // Add event listener to share image button
-        const shareBtn = recipeContent.querySelector('#share-image-btn');
-        if (shareBtn) {
-            shareBtn.addEventListener('click', () => {
+        const shareImageBtn = recipeContent.querySelector('#share-image-btn');
+        if (shareImageBtn) {
+            shareImageBtn.addEventListener('click', () => {
                 this.shareRecipeAsImage(combo);
             });
         }

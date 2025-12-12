@@ -78,14 +78,14 @@ const ColorMixer = {
     /**
      * Generate all possible 2-way combinations
      */
-    generateTwoWayCombinations(filaments, activeFilaments) {
+    generateTwoWayCombinations(filaments, activeFilaments, granularity = 5) {
         const combinations = [];
         const active = filaments.filter(f => activeFilaments.has(f.id));
 
         for (let i = 0; i < active.length; i++) {
             for (let j = i + 1; j < active.length; j++) {
-                // Sample at 5% intervals for smoother color gradients
-                for (let pct = 5; pct <= 95; pct += 5) {
+                // Sample at specified granularity
+                for (let pct = granularity; pct <= 100 - granularity; pct += granularity) {
                     const ratio = pct / 100;
                     const mixedColor = this.mixTwo(
                         active[i].hexColor,
@@ -231,12 +231,12 @@ const ColorMixer = {
     /**
      * Generate all combinations based on filters
      */
-    generateAllCombinations(filaments, activeFilaments, filters) {
+    generateAllCombinations(filaments, activeFilaments, filters, granularity = 5) {
         let combinations = [];
 
         if (filters.twoWay) {
             combinations = combinations.concat(
-                this.generateTwoWayCombinations(filaments, activeFilaments)
+                this.generateTwoWayCombinations(filaments, activeFilaments, granularity)
             );
         }
 

@@ -8,6 +8,9 @@ const FilamentManager = {
     activeFilaments: new Set(),
     searchTimeout: null,
     onUpdate: null,
+    undoStack: [],
+    redoStack: [],
+    maxUndoStackSize: 20,
 
     /**
      * Initialize manager
@@ -106,6 +109,21 @@ const FilamentManager = {
         document.getElementById('import-file-input')?.addEventListener('change', (e) => {
             this.importFilaments(e.target.files[0]);
         });
+
+        // Keyboard shortcuts for undo/redo
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + Z for undo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                this.undo();
+            }
+            // Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y for redo
+            if (((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) ||
+                ((e.ctrlKey || e.metaKey) && e.key === 'y')) {
+                e.preventDefault();
+                this.redo();
+            }
+        });
     },
 
     /**
@@ -124,9 +142,90 @@ const FilamentManager = {
     },
 
     /**
+     * Save state to undo stack
+     */
+    saveToUndoStack() {
+        const state = {
+            filaments: JSON.parse(JSON.stringify(this.filaments)),
+            activeFilaments: new Set(this.activeFilaments)
+        };
+        
+        this.undoStack.push(state);
+        
+        // Limit stack size
+        if (this.undoStack.length > this.maxUndoStackSize) {
+            this.undoStack.shift();
+        }
+        
+        // Clear redo stack when new action is performed
+        this.redoStack = [];
+    },
+
+    /**
+     * Undo last action
+     */
+    undo() {
+        if (this.undoStack.length === 0) {
+            Toast.info('Nothing to undo');
+            return;
+        }
+
+        // Save current state to redo stack
+        const currentState = {
+            filaments: JSON.parse(JSON.stringify(this.filaments)),
+            activeFilaments: new Set(this.activeFilaments)
+        };
+        this.redoStack.push(currentState);
+
+        // Restore previous state
+        const previousState = this.undoStack.pop();
+        this.filaments = previousState.filaments;
+        this.activeFilaments = previousState.activeFilaments;
+        
+        this.saveFilaments();
+        this.render();
+        
+        Toast.success('Undone');
+        
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+
+    /**
+     * Redo last undone action
+     */
+    redo() {
+        if (this.redoStack.length === 0) {
+            Toast.info('Nothing to redo');
+            return;
+        }
+
+        // Save current state to undo stack
+        this.saveToUndoStack();
+
+        // Restore redo state
+        const redoState = this.redoStack.pop();
+        this.filaments = redoState.filaments;
+        this.activeFilaments = redoState.activeFilaments;
+        
+        this.saveFilaments();
+        this.render();
+        
+        Toast.success('Redone');
+        
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+
+    /**
      * Add filament
      */
     addFilament(filament, showToast = true) {
+        // Save state for undo
+        this.saveToUndoStack();
+        
         filament.id = filament.id || `fil-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         this.filaments.push(filament);
         this.activeFilaments.add(filament.id);
@@ -154,6 +253,9 @@ const FilamentManager = {
         if (!confirm(`Remove ${colorName} from your inventory?\n\nThis will recalculate all color combinations.`)) {
             return;
         }
+        
+        // Save state for undo
+        this.saveToUndoStack();
         
         this.filaments = this.filaments.filter(f => f.id !== id);
         this.activeFilaments.delete(id);

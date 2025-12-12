@@ -10,6 +10,7 @@ const App = {
         threeWay: true,
         fourWay: true
     },
+    mixGranularity: 5,
     lightnessFilter: 50,
     colorFilters: {
         hueMin: 0,
@@ -81,6 +82,13 @@ const App = {
 
         document.getElementById('filter-4way')?.addEventListener('change', (e) => {
             this.filters.fourWay = e.target.checked;
+            this.updateCombinations();
+        });
+
+        // Mix granularity selector
+        document.getElementById('mix-granularity')?.addEventListener('change', (e) => {
+            this.mixGranularity = parseInt(e.target.value);
+            Toast.info(`Mix granularity set to ${this.mixGranularity}% steps`);
             this.updateCombinations();
         });
 
@@ -170,12 +178,46 @@ const App = {
                 this.closeRecipe();
                 FilamentManager.closeAddModal();
                 FilamentManager.closeTargetModal();
+                this.closeShortcutsModal();
             }
             // Ctrl/Cmd + K to open add filament
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
                 FilamentManager.openAddModal();
             }
+            // ? to show keyboard shortcuts
+            if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                this.openShortcutsModal();
+            }
+            // 1, 2, 3 to switch views
+            if (e.key === '1' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                ColorVisualizer.switchView('2d');
+            }
+            if (e.key === '2' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                ColorVisualizer.switchView('3d');
+            }
+            if (e.key === '3' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                ColorVisualizer.switchView('grid');
+            }
+        });
+
+        // Help button
+        document.getElementById('fab-help')?.addEventListener('click', () => {
+            this.openShortcutsModal();
+        });
+
+        // Close shortcuts modal
+        document.getElementById('close-shortcuts-modal')?.addEventListener('click', () => {
+            this.closeShortcutsModal();
+        });
+
+        // Export palette button
+        document.getElementById('export-palette-btn')?.addEventListener('click', () => {
+            this.exportPalette();
         });
     },
 
@@ -217,7 +259,8 @@ const App = {
             this.combinations = ColorMixer.generateAllCombinations(
                 FilamentManager.filaments,
                 FilamentManager.activeFilaments,
-                this.filters
+                this.filters,
+                this.mixGranularity
             );
 
             const endTime = performance.now();
@@ -499,6 +542,99 @@ const App = {
         }
         
         document.body.removeChild(textArea);
+    },
+
+    /**
+     * Open keyboard shortcuts modal
+     */
+    openShortcutsModal() {
+        const modal = document.getElementById('shortcuts-modal');
+        if (modal) {
+            modal.classList.add('visible');
+        }
+    },
+
+    /**
+     * Close keyboard shortcuts modal
+     */
+    closeShortcutsModal() {
+        const modal = document.getElementById('shortcuts-modal');
+        if (modal) {
+            modal.classList.remove('visible');
+        }
+    },
+
+    /**
+     * Export color palette as JSON
+     */
+    exportPalette() {
+        if (this.combinations.length === 0) {
+            Toast.warning('No colors to export. Add some filaments first!');
+            return;
+        }
+
+        // Apply filters to get the current visible colors
+        const filteredColors = this.combinations.filter(combo => {
+            const hsl = ColorMixer.hexToHsl(combo.color);
+            
+            // Lightness filter
+            const lightnessDiff = Math.abs(hsl.l - this.lightnessFilter);
+            if (lightnessDiff > 15) return false;
+            
+            // Color filters
+            if (this.colorFilters) {
+                const hueMin = this.colorFilters.hueMin;
+                const hueMax = this.colorFilters.hueMax;
+                
+                if (hueMin <= hueMax) {
+                    if (hsl.h < hueMin || hsl.h > hueMax) return false;
+                } else {
+                    if (hsl.h < hueMin && hsl.h > hueMax) return false;
+                }
+                
+                if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return false;
+            }
+            
+            return true;
+        });
+
+        // Create palette data
+        const palette = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            totalColors: filteredColors.length,
+            filters: {
+                lightness: this.lightnessFilter,
+                hueRange: [this.colorFilters.hueMin, this.colorFilters.hueMax],
+                saturationRange: [this.colorFilters.satMin, this.colorFilters.satMax]
+            },
+            filaments: FilamentManager.filaments.map(f => ({
+                brand: f.brand,
+                material: f.material,
+                colorName: f.colorName,
+                hexColor: f.hexColor
+            })),
+            colors: filteredColors.slice(0, 1000).map(combo => ({
+                hex: combo.color,
+                recipe: combo.recipe,
+                type: combo.type,
+                hsl: ColorMixer.hexToHsl(combo.color)
+            }))
+        };
+
+        const json = JSON.stringify(palette, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `color-palette-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        Toast.success(`Exported ${palette.colors.length} colors to palette file!`);
     }
 };
 

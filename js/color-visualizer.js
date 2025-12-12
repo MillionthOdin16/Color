@@ -406,7 +406,7 @@ const ColorVisualizer = {
     },
 
     /**
-     * Render grid view
+     * Render grid view with batch rendering for better performance
      */
     renderGrid() {
         const gridContainer = document.getElementById('color-grid');
@@ -436,22 +436,46 @@ const ColorVisualizer = {
         }
 
         // Limit to reasonable number for performance
-        const displayCombos = filteredCombos.slice(0, 500);
+        const displayCombos = filteredCombos.slice(0, 1000);
 
-        displayCombos.forEach(combo => {
-            const swatch = document.createElement('div');
-            swatch.className = 'color-swatch';
-            swatch.style.background = combo.color;
-            swatch.setAttribute('data-recipe', combo.recipe);
+        // Batch render for better performance
+        const batchSize = 100;
+        let currentBatch = 0;
 
-            swatch.addEventListener('click', () => {
-                if (this.onColorClick) {
-                    this.onColorClick(combo);
-                }
-            });
+        const renderBatch = () => {
+            const start = currentBatch * batchSize;
+            const end = Math.min(start + batchSize, displayCombos.length);
+            
+            const fragment = document.createDocumentFragment();
+            
+            for (let i = start; i < end; i++) {
+                const combo = displayCombos[i];
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.background = combo.color;
+                swatch.setAttribute('data-recipe', combo.recipe);
+                swatch.setAttribute('data-color', combo.color);
+                swatch.title = combo.recipe;
 
-            gridContainer.appendChild(swatch);
-        });
+                swatch.addEventListener('click', () => {
+                    if (this.onColorClick) {
+                        this.onColorClick(combo);
+                    }
+                });
+
+                fragment.appendChild(swatch);
+            }
+            
+            gridContainer.appendChild(fragment);
+            
+            currentBatch++;
+            
+            if (end < displayCombos.length) {
+                requestAnimationFrame(renderBatch);
+            }
+        };
+
+        renderBatch();
     },
 
     /**

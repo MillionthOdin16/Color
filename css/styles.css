@@ -669,15 +669,18 @@ body {
 
 .controls-hint {
     position: absolute;
-    bottom: 1rem;
+    bottom: 1.5rem;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.9);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-lg);
-    font-size: 0.875rem;
+    background: rgba(15, 23, 42, 0.95);
+    padding: 0.875rem 1.75rem;
+    border-radius: var(--radius-xl);
+    font-size: 0.9375rem;
     color: var(--text-secondary);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-xl);
+    font-weight: 500;
 }
 
 .color-grid {
@@ -1933,6 +1936,31 @@ input[type="checkbox"]:focus {
     outline-offset: 2px;
 }
 
+/* ========================================
+   Select/Dropdown Styling
+   ======================================== */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23cbd5e1' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    padding-right: 2.5rem;
+    transition: all var(--transition-base);
+    cursor: pointer;
+}
+
+select:hover {
+    border-color: var(--border-light);
+    background-color: var(--bg-elevated);
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
@@ -1951,6 +1979,28 @@ select:focus-visible {
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 }
 

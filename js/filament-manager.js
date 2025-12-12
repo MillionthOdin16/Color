@@ -423,10 +423,10 @@ const FilamentManager = {
 
         if (this.filaments.length === 0) {
             listContainer.innerHTML = `
-                <div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary);">
-                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
-                    <p>No filaments yet</p>
-                    <p style="font-size: 0.875rem; margin-top: 0.5rem;">Add filaments or load samples to get started</p>
+                <div style="text-align: center; padding: 2.5rem 1.25rem; color: var(--text-secondary);">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.7;">📦</div>
+                    <p style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: var(--text-primary);">No filaments yet</p>
+                    <p style="font-size: 0.9375rem; margin-top: 0.625rem; line-height: 1.5;">Add filaments or load samples to get started</p>
                 </div>
             `;
             this.updateStats();

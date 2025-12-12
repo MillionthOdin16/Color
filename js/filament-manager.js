@@ -118,6 +118,9 @@ const FilamentManager = {
         this.saveFilaments();
         this.render();
 
+        // Show success toast
+        Toast.success(`Added ${filament.colorName} to your inventory`);
+
         if (this.onUpdate) {
             this.onUpdate();
         }
@@ -127,10 +130,16 @@ const FilamentManager = {
      * Remove filament
      */
     removeFilament(id) {
+        const filament = this.filaments.find(f => f.id === id);
+        const colorName = filament ? filament.colorName : 'Filament';
+        
         this.filaments = this.filaments.filter(f => f.id !== id);
         this.activeFilaments.delete(id);
         this.saveFilaments();
         this.render();
+
+        // Show info toast
+        Toast.info(`Removed ${colorName} from inventory`);
 
         if (this.onUpdate) {
             this.onUpdate();
@@ -308,11 +317,20 @@ const FilamentManager = {
             const results = await FilamentAPI.searchFilaments(query);
 
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #94a3b8;">No results found</div>';
+                resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #94a3b8;">No results found. Try manual entry below.</div>';
                 return;
             }
 
             resultsContainer.innerHTML = '';
+            
+            // Show info badge if using local database
+            const usingLocal = results.length > 0 && results[0].source === 'local';
+            if (usingLocal) {
+                const infoBanner = document.createElement('div');
+                infoBanner.style.cssText = 'padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; font-size: 0.875rem; color: #94a3b8;';
+                infoBanner.innerHTML = '💡 Showing results from local database (120+ colors)';
+                resultsContainer.appendChild(infoBanner);
+            }
 
             results.forEach(result => {
                 const item = document.createElement('div');
@@ -334,7 +352,8 @@ const FilamentManager = {
                 resultsContainer.appendChild(item);
             });
         } catch (error) {
-            resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #ef4444;">Error searching. Try manual entry.</div>';
+            console.error('Search error:', error);
+            resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #ef4444;">Unable to search. Please try manual entry below.</div>';
         }
     },
 
@@ -349,7 +368,7 @@ const FilamentManager = {
                         document.getElementById('manual-color-picker').value;
 
         if (!brand || !material || !colorName || !hexColor) {
-            alert('Please fill in all fields');
+            Toast.warning('Please fill in all fields');
             return;
         }
 
@@ -382,6 +401,7 @@ const FilamentManager = {
         ];
 
         samples.forEach(sample => this.addFilament({ ...sample, source: 'sample' }));
+        Toast.success(`Loaded ${samples.length} sample filaments!`);
     },
 
     /**
@@ -392,7 +412,12 @@ const FilamentManager = {
                          document.getElementById('target-color-picker').value;
 
         if (!targetHex) {
-            alert('Please select a target color');
+            Toast.warning('Please select a target color');
+            return;
+        }
+
+        if (this.filaments.length === 0) {
+            Toast.error('Add some filaments first to find matches');
             return;
         }
 
@@ -403,6 +428,11 @@ const FilamentManager = {
             this.activeFilaments,
             filters
         );
+
+        if (combinations.length === 0) {
+            Toast.warning('No combinations available. Make sure filaments are active.');
+            return;
+        }
 
         // Find matches
         const matches = ColorMixer.findClosestMatches(targetHex, combinations, 10);
@@ -417,6 +447,8 @@ const FilamentManager = {
             container.innerHTML = '<div style="padding: 1rem; text-align: center; color: #94a3b8;">No matches found. Try adding more filaments!</div>';
             return;
         }
+
+        Toast.success(`Found ${matches.length} matching color combinations!`);
 
         matches.forEach((match, index) => {
             const item = document.createElement('div');

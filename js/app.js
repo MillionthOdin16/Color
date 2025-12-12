@@ -82,6 +82,30 @@ const App = {
         document.getElementById('close-recipe')?.addEventListener('click', () => {
             this.closeRecipe();
         });
+
+        // Empty state CTA buttons
+        document.querySelector('.cta-add-filament')?.addEventListener('click', () => {
+            FilamentManager.openAddModal();
+        });
+
+        document.querySelector('.cta-load-samples')?.addEventListener('click', () => {
+            FilamentManager.loadSampleFilaments();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // ESC to close modals and recipe panel
+            if (e.key === 'Escape') {
+                this.closeRecipe();
+                FilamentManager.closeAddModal();
+                FilamentManager.closeTargetModal();
+            }
+            // Ctrl/Cmd + K to open add filament
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                FilamentManager.openAddModal();
+            }
+        });
     },
 
     /**

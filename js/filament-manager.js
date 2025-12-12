@@ -9,6 +9,7 @@ const FilamentManager = {
     searchTimeout: null,
     onUpdate: null,
     selectedBrand: 'all', // Track selected brand filter
+    sortBy: 'dateAdded', // Track sort order
 
     /**
      * Initialize manager
@@ -131,6 +132,39 @@ const FilamentManager = {
         document.getElementById('find-matches-btn')?.addEventListener('click', () => {
             this.findTargetColorMatches();
         });
+        
+        // Brand filter chips
+        document.querySelectorAll('.brand-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                // Update active state
+                document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // Update selected brand
+                this.selectedBrand = e.target.getAttribute('data-brand');
+                
+                // Trigger search with current query
+                const searchInput = document.getElementById('filament-search');
+                if (searchInput) {
+                    this.handleSearch(searchInput.value);
+                }
+            });
+        });
+        
+        // Select all/none buttons
+        document.getElementById('select-all-btn')?.addEventListener('click', () => {
+            this.selectAllFilaments();
+        });
+        
+        document.getElementById('select-none-btn')?.addEventListener('click', () => {
+            this.selectNoneFilaments();
+        });
+        
+        // Sort dropdown
+        document.getElementById('filament-sort')?.addEventListener('change', (e) => {
+            this.sortBy = e.target.value;
+            this.render();
+        });
     },
 
     /**
@@ -200,6 +234,58 @@ const FilamentManager = {
             this.onUpdate();
         }
     },
+    
+    /**
+     * Select all filaments
+     */
+    selectAllFilaments() {
+        this.filaments.forEach(f => this.activeFilaments.add(f.id));
+        this.renderActiveCheckboxes();
+        Toast.success('All filaments selected');
+        
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+    
+    /**
+     * Deselect all filaments
+     */
+    selectNoneFilaments() {
+        this.activeFilaments.clear();
+        this.renderActiveCheckboxes();
+        Toast.info('All filaments deselected');
+        
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+    
+    /**
+     * Get sorted filaments based on current sort setting
+     */
+    getSortedFilaments() {
+        const sorted = [...this.filaments];
+        
+        switch (this.sortBy) {
+            case 'brand':
+                sorted.sort((a, b) => a.brand.localeCompare(b.brand) || a.colorName.localeCompare(b.colorName));
+                break;
+            case 'color':
+                sorted.sort((a, b) => a.colorName.localeCompare(b.colorName));
+                break;
+            case 'material':
+                sorted.sort((a, b) => a.material.localeCompare(b.material) || a.brand.localeCompare(b.brand));
+                break;
+            case 'dateAdded':
+            default:
+                // Keep original order (most recently added last, so reverse)
+                sorted.reverse();
+                break;
+        }
+        
+        return sorted;
+    },
 
     /**
      * Render filament list
@@ -221,8 +307,11 @@ const FilamentManager = {
             this.updateStats();
             return;
         }
+        
+        // Sort filaments
+        const sorted = this.getSortedFilaments();
 
-        this.filaments.forEach(filament => {
+        sorted.forEach(filament => {
             const item = document.createElement('div');
             item.className = 'filament-item';
 
@@ -364,13 +453,14 @@ const FilamentManager = {
     },
 
     /**
-     * Handle search
+     * Handle search with brand filtering
      */
     async handleSearch(query) {
         const resultsContainer = document.getElementById('search-results');
         if (!resultsContainer) return;
 
-        if (!query || query.length < 2) {
+        // If no query and no brand filter, show nothing
+        if ((!query || query.length < 1) && this.selectedBrand === 'all') {
             resultsContainer.innerHTML = '';
             return;
         }
@@ -378,7 +468,19 @@ const FilamentManager = {
         resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center;">Searching...</div>';
 
         try {
-            const results = await FilamentAPI.searchFilaments(query);
+            let results;
+            
+            // If brand filter is active but no query, show all from that brand
+            if (this.selectedBrand !== 'all' && (!query || query.length === 0)) {
+                results = await FilamentAPI.searchFilaments(this.selectedBrand);
+            } else {
+                results = await FilamentAPI.searchFilaments(query || '');
+            }
+            
+            // Apply brand filter if selected
+            if (this.selectedBrand !== 'all') {
+                results = results.filter(r => r.brand === this.selectedBrand);
+            }
 
             if (results.length === 0) {
                 resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #94a3b8;">No results found. Try manual entry below.</div>';
@@ -387,12 +489,12 @@ const FilamentManager = {
 
             resultsContainer.innerHTML = '';
             
-            // Show info badge if using local database
+            // Show info badge
             const usingLocal = results.length > 0 && results[0].source === 'local';
             if (usingLocal) {
                 const infoBanner = document.createElement('div');
                 infoBanner.style.cssText = 'padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; font-size: 0.875rem; color: #94a3b8;';
-                infoBanner.innerHTML = '💡 Showing results from local database (120+ colors)';
+                infoBanner.innerHTML = `💡 Showing ${results.length} color${results.length !== 1 ? 's' : ''} from local database`;
                 resultsContainer.appendChild(infoBanner);
             }
 

@@ -193,6 +193,9 @@ const App = {
             if (colorCount) {
                 colorCount.textContent = `${this.combinations.length} colors possible`;
             }
+            
+            // Update filter labels with counts
+            this.updateFilterCounts();
 
             this.updateVisualization();
             this.updateUIState();
@@ -207,6 +210,29 @@ const App = {
      */
     updateVisualization() {
         ColorVisualizer.update(this.combinations, this.lightnessFilter);
+    },
+    
+    /**
+     * Update filter labels with combination counts
+     */
+    updateFilterCounts() {
+        const twoWayCount = this.combinations.filter(c => c.filaments.length === 2).length;
+        const threeWayCount = this.combinations.filter(c => c.filaments.length === 3).length;
+        const fourWayCount = this.combinations.filter(c => c.filaments.length === 4).length;
+        
+        const filter2way = document.querySelector('#filter-2way + span');
+        const filter3way = document.querySelector('#filter-3way + span');
+        const filter4way = document.querySelector('#filter-4way + span');
+        
+        if (filter2way) {
+            filter2way.innerHTML = `2-way mixes <span class="hint-text">(${twoWayCount})</span>`;
+        }
+        if (filter3way) {
+            filter3way.innerHTML = `3-way mixes <span class="hint-text">(${threeWayCount})</span>`;
+        }
+        if (filter4way) {
+            filter4way.innerHTML = `4-way mixes <span class="hint-text">(${fourWayCount})</span>`;
+        }
     },
 
     /**

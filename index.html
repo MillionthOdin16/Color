@@ -22,10 +22,18 @@
             <!-- Left Sidebar: Filament Inventory -->
             <aside class="filament-inventory">
                 <div class="inventory-header">
-                    <h2>Your Filaments</h2>
+                    <h3>Your Filaments</h3>
                     <div class="stats">
                         <span class="stat-badge" id="filament-count">0 filaments</span>
                         <span class="stat-badge" id="color-count">0 colors possible</span>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <select id="filament-sort" style="width: 100%; padding: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 0.875rem; cursor: pointer;">
+                            <option value="dateAdded">Sort: Recently Added</option>
+                            <option value="brand">Sort: Brand A-Z</option>
+                            <option value="color">Sort: Color Name A-Z</option>
+                            <option value="material">Sort: Material</option>
+                        </select>
                     </div>
                 </div>
 
@@ -72,7 +80,13 @@
 
                 <!-- Active Filament Filter -->
                 <div class="active-filter">
-                    <h3>Active Filaments</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h3>Active Filaments</h3>
+                        <div style="display: flex; gap: 0.25rem;">
+                            <button id="select-all-btn" class="icon-btn" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Select All">All</button>
+                            <button id="select-none-btn" class="icon-btn" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Deselect All">None</button>
+                        </div>
+                    </div>
                     <p class="hint">Uncheck to exclude from mixing</p>
                     <div id="active-filament-checkboxes">
                         <!-- Checkboxes will be populated here -->

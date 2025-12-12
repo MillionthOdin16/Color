@@ -66,15 +66,15 @@
                     <h3>Mix Types <span class="info-icon" title="Different combinations of filaments">ℹ️</span></h3>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-2way" checked>
-                        <span>2-way mixes <span class="hint-text">(2 colors)</span></span>
+                        <span>2-way mixes <span class="hint-text" id="combo-count-2">(0)</span></span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-3way" checked>
-                        <span>3-way mixes <span class="hint-text">(3 colors)</span></span>
+                        <span>3-way mixes <span class="hint-text" id="combo-count-3">(0)</span></span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-4way" checked>
-                        <span>4-way mixes <span class="hint-text">(4 colors)</span></span>
+                        <span>4-way mixes <span class="hint-text" id="combo-count-4">(0)</span></span>
                     </label>
                 </div>
 
@@ -83,8 +83,8 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <h3>Active Filaments</h3>
                         <div style="display: flex; gap: 0.25rem;">
-                            <button id="select-all-btn" class="icon-btn" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Select All">All</button>
-                            <button id="select-none-btn" class="icon-btn" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Deselect All">None</button>
+                            <button id="select-all-active" class="icon-btn" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Select All">All</button>
+                            <button id="select-none-active" class="icon-btn" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Deselect All">None</button>
                         </div>
                     </div>
                     <p class="hint">Uncheck to exclude from mixing</p>
@@ -102,12 +102,26 @@
                         <button class="toggle-btn" data-view="3d">3D Space</button>
                         <button class="toggle-btn" data-view="grid">Grid View</button>
                     </div>
-
+                    
                     <div class="lightness-control">
-                        <label for="lightness-slider">Lightness</label>
+                        <label for="lightness-slider" style="display: flex; align-items: center; gap: 0.25rem;">
+                            <span>💡</span>
+                            <span>Lightness</span>
+                        </label>
                         <input type="range" id="lightness-slider" min="0" max="100" value="50">
-                        <span id="lightness-value">50%</span>
+                        <span id="lightness-value" style="min-width: 3rem; text-align: right; font-weight: 600;">50%</span>
                     </div>
+                </div>
+                
+                <!-- Color Preset Filters -->
+                <div style="padding: 0 1rem 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                    <span style="color: var(--text-secondary); font-size: 0.875rem; display: flex; align-items: center; font-weight: 600;">Quick filters:</span>
+                    <button class="preset-chip active" data-preset="all">✨ All</button>
+                    <button class="preset-chip" data-preset="warm">🔥 Warm</button>
+                    <button class="preset-chip" data-preset="cool">❄️ Cool</button>
+                    <button class="preset-chip" data-preset="neutral">⚪ Neutral</button>
+                    <button class="preset-chip" data-preset="vibrant">🌈 Vibrant</button>
+                    <button class="preset-chip" data-preset="pastel">🎀 Pastel</button>
                 </div>
 
                 <!-- 2D Canvas View -->
@@ -173,6 +187,27 @@
             </main>
 
             <!-- Right Panel: Recipe Details -->
+            <!-- Right Sidebar: Recent & Favorites -->
+            <aside class="history-panel" id="history-panel">
+                <div class="history-tabs">
+                    <button class="history-tab active" data-tab="recent">🕒 Recent</button>
+                    <button class="history-tab" data-tab="favorites">⭐ Favorites</button>
+                </div>
+                
+                <div class="history-content active" id="recent-colors">
+                    <p class="hint-text" style="padding: 1rem; text-align: center;">
+                        Recently viewed colors will appear here
+                    </p>
+                </div>
+                
+                <div class="history-content" id="favorite-colors">
+                    <p class="hint-text" style="padding: 1rem; text-align: center;">
+                        Your favorite colors will appear here
+                    </p>
+                </div>
+            </aside>
+
+            <!-- Recipe Panel -->
             <aside class="recipe-panel" id="recipe-panel">
                 <div class="panel-header">
                     <h2>Color Recipe</h2>

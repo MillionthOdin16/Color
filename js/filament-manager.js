@@ -856,5 +856,27 @@ const FilamentManager = {
 
             container.appendChild(item);
         });
+    },
+    
+    /**
+     * Select all active filaments
+     */
+    selectAllActive() {
+        this.filaments.forEach(f => {
+            this.activeFilaments.add(f.id);
+        });
+        this.render();
+        if (this.onUpdate) this.onUpdate();
+        Toast.success('All filaments selected');
+    },
+    
+    /**
+     * Deselect all active filaments
+     */
+    selectNoneActive() {
+        this.activeFilaments.clear();
+        this.render();
+        if (this.onUpdate) this.onUpdate();
+        Toast.info('All filaments deselected');
     }
 };

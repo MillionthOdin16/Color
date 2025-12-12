@@ -32,7 +32,20 @@
                 <!-- Add Filament Section -->
                 <div class="add-filament-section">
                     <button class="btn-primary" id="add-filament-btn">+ Add Filament</button>
-                    <button class="btn-secondary" id="load-samples-btn">Load Sample Set</button>
+                    <button class="btn-secondary" id="load-samples-btn">📦 Load Samples</button>
+                </div>
+
+                <!-- Inventory Management -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <button class="btn-secondary" id="export-filaments-btn" style="flex: 1; font-size: 0.875rem; padding: 0.5rem;">
+                        💾 Export
+                    </button>
+                    <button class="btn-secondary" id="import-filaments-btn" style="flex: 1; font-size: 0.875rem; padding: 0.5rem;">
+                        📥 Import
+                    </button>
+                    <button class="btn-secondary" id="clear-all-btn" style="flex: 1; font-size: 0.875rem; padding: 0.5rem; background: rgba(244, 67, 54, 0.2); border-color: rgba(244, 67, 54, 0.3);">
+                        🗑️ Clear
+                    </button>
                 </div>
 
                 <!-- Filament List -->
@@ -214,6 +227,30 @@
 
                 <div class="matches-container" id="matches-container">
                     <!-- Matches will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Filament Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Filament</h2>
+                <button class="close-btn" id="close-edit-modal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="manual-entry">
+                    <label for="edit-brand">Filament Details</label>
+                    <input type="text" id="edit-brand" placeholder="Brand (e.g., Bambu Lab)">
+                    <input type="text" id="edit-material" placeholder="Material (e.g., PLA Basic)">
+                    <input type="text" id="edit-color-name" placeholder="Color Name (e.g., Blue)">
+                    <div class="color-picker-group">
+                        <input type="color" id="edit-color-picker" value="#0066CC">
+                        <input type="text" id="edit-hex" placeholder="#0066CC" maxlength="7">
+                    </div>
+                    <button class="btn-primary" id="save-edit-btn">Save Changes</button>
                 </div>
             </div>
         </div>

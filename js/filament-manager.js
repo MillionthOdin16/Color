@@ -91,6 +91,21 @@ const FilamentManager = {
         document.getElementById('find-matches-btn')?.addEventListener('click', () => {
             this.findTargetColorMatches();
         });
+
+        // Export filaments button
+        document.getElementById('export-filaments-btn')?.addEventListener('click', () => {
+            this.exportFilaments();
+        });
+
+        // Import filaments button  
+        document.getElementById('import-filaments-btn')?.addEventListener('click', () => {
+            document.getElementById('import-file-input')?.click();
+        });
+
+        // File input change
+        document.getElementById('import-file-input')?.addEventListener('change', (e) => {
+            this.importFilaments(e.target.files[0]);
+        });
     },
 
     /**
@@ -111,7 +126,7 @@ const FilamentManager = {
     /**
      * Add filament
      */
-    addFilament(filament) {
+    addFilament(filament, showToast = true) {
         filament.id = filament.id || `fil-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         this.filaments.push(filament);
         this.activeFilaments.add(filament.id);
@@ -119,7 +134,9 @@ const FilamentManager = {
         this.render();
 
         // Show success toast
-        Toast.success(`Added ${filament.colorName} to your inventory`);
+        if (showToast) {
+            Toast.success(`Added ${filament.colorName} to your inventory`);
+        }
 
         if (this.onUpdate) {
             this.onUpdate();
@@ -133,13 +150,18 @@ const FilamentManager = {
         const filament = this.filaments.find(f => f.id === id);
         const colorName = filament ? filament.colorName : 'Filament';
         
+        // Show confirmation dialog
+        if (!confirm(`Remove ${colorName} from your inventory?\n\nThis will recalculate all color combinations.`)) {
+            return;
+        }
+        
         this.filaments = this.filaments.filter(f => f.id !== id);
         this.activeFilaments.delete(id);
         this.saveFilaments();
         this.render();
 
-        // Show info toast
-        Toast.info(`Removed ${colorName} from inventory`);
+        // Show success toast
+        Toast.success(`Removed ${colorName} from inventory`);
 
         if (this.onUpdate) {
             this.onUpdate();
@@ -476,5 +498,116 @@ const FilamentManager = {
 
             container.appendChild(item);
         });
+    },
+
+    /**
+     * Export filaments to JSON file
+     */
+    exportFilaments() {
+        if (this.filaments.length === 0) {
+            Toast.warning('No filaments to export');
+            return;
+        }
+
+        const data = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            filaments: this.filaments,
+            activeFilaments: Array.from(this.activeFilaments)
+        };
+
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `filament-inventory-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        Toast.success(`Exported ${this.filaments.length} filaments!`);
+    },
+
+    /**
+     * Import filaments from JSON file
+     */
+    importFilaments(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                if (!data.filaments || !Array.isArray(data.filaments)) {
+                    throw new Error('Invalid file format');
+                }
+
+                // Ask for confirmation if there are existing filaments
+                if (this.filaments.length > 0) {
+                    const replace = confirm(
+                        `You currently have ${this.filaments.length} filament(s).\n\n` +
+                        `Import will add ${data.filaments.length} filament(s) from the file.\n\n` +
+                        `Do you want to continue?`
+                    );
+                    
+                    if (!replace) {
+                        return;
+                    }
+                }
+
+                // Import filaments
+                let imported = 0;
+                let duplicates = 0;
+                
+                data.filaments.forEach(filament => {
+                    // Check for duplicates (same brand, material, and color name)
+                    const exists = this.filaments.some(f => 
+                        f.brand === filament.brand && 
+                        f.material === filament.material && 
+                        f.colorName === filament.colorName
+                    );
+                    
+                    if (!exists) {
+                        this.addFilament(filament, false); // Don't show toast for each
+                        imported++;
+                    } else {
+                        duplicates++;
+                    }
+                });
+
+                // Restore active filaments if provided
+                if (data.activeFilaments && Array.isArray(data.activeFilaments)) {
+                    data.activeFilaments.forEach(id => {
+                        if (this.filaments.some(f => f.id === id)) {
+                            this.activeFilaments.add(id);
+                        }
+                    });
+                }
+
+                this.render();
+                if (this.onUpdate) {
+                    this.onUpdate();
+                }
+
+                let message = `Successfully imported ${imported} filament(s)!`;
+                if (duplicates > 0) {
+                    message += ` (${duplicates} duplicate(s) skipped)`;
+                }
+                Toast.success(message);
+
+            } catch (error) {
+                console.error('Import error:', error);
+                Toast.error('Failed to import file. Please check the file format.');
+            }
+        };
+
+        reader.readAsText(file);
+        
+        // Reset file input
+        document.getElementById('import-file-input').value = '';
     }
 };

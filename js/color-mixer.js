@@ -84,8 +84,8 @@ const ColorMixer = {
 
         for (let i = 0; i < active.length; i++) {
             for (let j = i + 1; j < active.length; j++) {
-                // Sample at different ratios
-                for (let pct = 10; pct <= 90; pct += 10) {
+                // Sample at 5% intervals for smoother color gradients
+                for (let pct = 5; pct <= 95; pct += 5) {
                     const ratio = pct / 100;
                     const mixedColor = this.mixTwo(
                         active[i].hexColor,
@@ -118,15 +118,30 @@ const ColorMixer = {
         for (let i = 0; i < active.length; i++) {
             for (let j = i + 1; j < active.length; j++) {
                 for (let k = j + 1; k < active.length; k++) {
-                    // Sample various ratios (to keep it manageable)
+                    // Enhanced ratio samples with more granular options
                     const ratioSamples = [
+                        // Equal parts
                         [33, 33, 34],
+                        // One dominant
                         [50, 25, 25],
                         [25, 50, 25],
                         [25, 25, 50],
                         [60, 20, 20],
                         [20, 60, 20],
-                        [20, 20, 60]
+                        [20, 20, 60],
+                        [70, 15, 15],
+                        [15, 70, 15],
+                        [15, 15, 70],
+                        // Graduated mixes
+                        [40, 40, 20],
+                        [40, 20, 40],
+                        [20, 40, 40],
+                        [45, 35, 20],
+                        [45, 20, 35],
+                        [35, 45, 20],
+                        [35, 20, 45],
+                        [20, 45, 35],
+                        [20, 35, 45]
                     ];
 
                     for (const percentages of ratioSamples) {
@@ -164,13 +179,27 @@ const ColorMixer = {
             for (let j = i + 1; j < active.length; j++) {
                 for (let k = j + 1; k < active.length; k++) {
                     for (let l = k + 1; l < active.length; l++) {
-                        // Sample key ratios
+                        // Enhanced ratio samples with more variations
                         const ratioSamples = [
+                            // Equal parts
                             [25, 25, 25, 25],
+                            // One dominant
+                            [40, 20, 20, 20],
+                            [20, 40, 20, 20],
+                            [20, 20, 40, 20],
+                            [20, 20, 20, 40],
+                            [50, 20, 20, 10],
+                            [50, 20, 10, 20],
+                            [50, 10, 20, 20],
+                            // Two dominant
+                            [35, 35, 15, 15],
+                            [35, 15, 35, 15],
+                            [35, 15, 15, 35],
                             [40, 30, 20, 10],
+                            [40, 30, 10, 20],
                             [40, 20, 30, 10],
-                            [40, 20, 10, 30],
-                            [50, 20, 20, 10]
+                            [30, 40, 20, 10],
+                            [30, 40, 10, 20]
                         ];
 
                         for (const percentages of ratioSamples) {

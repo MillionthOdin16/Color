@@ -11,6 +11,12 @@ const App = {
         fourWay: true
     },
     lightnessFilter: 50,
+    colorFilters: {
+        hueMin: 0,
+        hueMax: 360,
+        satMin: 0,
+        satMax: 100
+    },
 
     /**
      * Initialize application
@@ -76,6 +82,71 @@ const App = {
         document.getElementById('filter-4way')?.addEventListener('change', (e) => {
             this.filters.fourWay = e.target.checked;
             this.updateCombinations();
+        });
+
+        // Advanced filter toggle
+        document.getElementById('advanced-filter-toggle')?.addEventListener('click', () => {
+            const panel = document.getElementById('advanced-filters');
+            const btn = document.getElementById('advanced-filter-toggle');
+            if (panel) {
+                const isVisible = panel.style.display !== 'none';
+                panel.style.display = isVisible ? 'none' : 'block';
+                btn.classList.toggle('active', !isVisible);
+            }
+        });
+
+        // Hue range filters
+        const hueMin = document.getElementById('hue-min');
+        const hueMax = document.getElementById('hue-max');
+        const hueMinVal = document.getElementById('hue-min-val');
+        const hueMaxVal = document.getElementById('hue-max-val');
+        
+        if (hueMin && hueMax) {
+            hueMin.addEventListener('input', (e) => {
+                this.colorFilters.hueMin = parseInt(e.target.value);
+                hueMinVal.textContent = `${this.colorFilters.hueMin}°`;
+                this.updateVisualization();
+            });
+            
+            hueMax.addEventListener('input', (e) => {
+                this.colorFilters.hueMax = parseInt(e.target.value);
+                hueMaxVal.textContent = `${this.colorFilters.hueMax}°`;
+                this.updateVisualization();
+            });
+        }
+
+        // Saturation range filters
+        const satMin = document.getElementById('sat-min');
+        const satMax = document.getElementById('sat-max');
+        const satMinVal = document.getElementById('sat-min-val');
+        const satMaxVal = document.getElementById('sat-max-val');
+        
+        if (satMin && satMax) {
+            satMin.addEventListener('input', (e) => {
+                this.colorFilters.satMin = parseInt(e.target.value);
+                satMinVal.textContent = `${this.colorFilters.satMin}%`;
+                this.updateVisualization();
+            });
+            
+            satMax.addEventListener('input', (e) => {
+                this.colorFilters.satMax = parseInt(e.target.value);
+                satMaxVal.textContent = `${this.colorFilters.satMax}%`;
+                this.updateVisualization();
+            });
+        }
+
+        // Reset filters button
+        document.getElementById('reset-filters')?.addEventListener('click', () => {
+            this.colorFilters = { hueMin: 0, hueMax: 360, satMin: 0, satMax: 100 };
+            if (hueMin) hueMin.value = 0;
+            if (hueMax) hueMax.value = 360;
+            if (satMin) satMin.value = 0;
+            if (satMax) satMax.value = 100;
+            if (hueMinVal) hueMinVal.textContent = '0°';
+            if (hueMaxVal) hueMaxVal.textContent = '360°';
+            if (satMinVal) satMinVal.textContent = '0%';
+            if (satMaxVal) satMaxVal.textContent = '100%';
+            this.updateVisualization();
         });
 
         // Close recipe panel
@@ -170,7 +241,7 @@ const App = {
      * Update visualization
      */
     updateVisualization() {
-        ColorVisualizer.update(this.combinations, this.lightnessFilter);
+        ColorVisualizer.update(this.combinations, this.lightnessFilter, this.colorFilters);
     },
 
     /**
@@ -187,13 +258,16 @@ const App = {
 
         // Build recipe HTML
         let html = `
-            <div class="recipe-color-preview" style="background: ${combo.color}"></div>
+            <div class="recipe-color-preview" style="background: ${combo.color}" title="Click to copy color code"></div>
 
             <div class="recipe-info">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3>Color: ${combo.color}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0;">Color: ${combo.color}</h3>
                     <span style="font-size: 0.875rem; color: #94a3b8;">${combo.type}</span>
                 </div>
+                <button class="btn-copy-color" data-color="${combo.color}" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer; font-size: 0.875rem; transition: all var(--transition-fast);">
+                    📋 Copy Color Code
+                </button>
 
                 <div>
         `;
@@ -238,6 +312,23 @@ const App = {
         }
 
         recipeContent.innerHTML = html;
+
+        // Add copy to clipboard functionality
+        const copyBtn = recipeContent.querySelector('.btn-copy-color');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                this.copyToClipboard(combo.color);
+            });
+        }
+
+        // Add click to color preview to copy
+        const preview = recipeContent.querySelector('.recipe-color-preview');
+        if (preview) {
+            preview.style.cursor = 'pointer';
+            preview.addEventListener('click', () => {
+                this.copyToClipboard(combo.color);
+            });
+        }
 
         // Add event listeners to sliders
         recipeContent.querySelectorAll('.percentage-slider').forEach(slider => {
@@ -368,6 +459,46 @@ const App = {
 
         recipePanel?.classList.remove('open');
         mainContent?.classList.remove('recipe-open');
+    },
+
+    /**
+     * Copy text to clipboard
+     */
+    copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    Toast.success(`Copied ${text} to clipboard!`);
+                })
+                .catch(err => {
+                    console.error('Failed to copy:', err);
+                    this.fallbackCopyToClipboard(text);
+                });
+        } else {
+            this.fallbackCopyToClipboard(text);
+        }
+    },
+
+    /**
+     * Fallback copy method for older browsers
+     */
+    fallbackCopyToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            Toast.success(`Copied ${text} to clipboard!`);
+        } catch (err) {
+            Toast.error('Failed to copy to clipboard');
+            console.error('Fallback copy failed:', err);
+        }
+        
+        document.body.removeChild(textArea);
     }
 };
 

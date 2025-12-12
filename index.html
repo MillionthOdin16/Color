@@ -30,6 +30,11 @@
                 <div class="add-filament-section">
                     <button class="btn-primary" id="add-filament-btn">+ Add Filament</button>
                     <button class="btn-secondary" id="load-samples-btn">Load Sample Set</button>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                        <button class="btn-secondary" id="export-filaments-btn" style="flex: 1; font-size: 0.75rem; padding: 0.5rem;">💾 Export</button>
+                        <button class="btn-secondary" id="import-filaments-btn" style="flex: 1; font-size: 0.75rem; padding: 0.5rem;">📁 Import</button>
+                    </div>
+                    <input type="file" id="import-file-input" accept=".json" style="display: none;">
                 </div>
 
                 <!-- Filament List -->
@@ -77,6 +82,37 @@
                         <label for="lightness-slider">Lightness</label>
                         <input type="range" id="lightness-slider" min="0" max="100" value="50">
                         <span id="lightness-value">50%</span>
+                    </div>
+                    
+                    <button class="btn-filter-toggle" id="advanced-filter-toggle" title="Advanced Color Filters">
+                        🎨 Filters
+                    </button>
+                </div>
+                
+                <!-- Advanced Filter Panel -->
+                <div class="advanced-filters" id="advanced-filters" style="display: none;">
+                    <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">Hue Range</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="range" id="hue-min" min="0" max="360" value="0" style="flex: 1;">
+                                <span id="hue-min-val" style="min-width: 3rem; font-size: 0.875rem;">0°</span>
+                                <span style="font-size: 0.875rem;">to</span>
+                                <input type="range" id="hue-max" min="0" max="360" value="360" style="flex: 1;">
+                                <span id="hue-max-val" style="min-width: 3rem; font-size: 0.875rem;">360°</span>
+                            </div>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">Saturation Range</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="range" id="sat-min" min="0" max="100" value="0" style="flex: 1;">
+                                <span id="sat-min-val" style="min-width: 3rem; font-size: 0.875rem;">0%</span>
+                                <span style="font-size: 0.875rem;">to</span>
+                                <input type="range" id="sat-max" min="0" max="100" value="100" style="flex: 1;">
+                                <span id="sat-max-val" style="min-width: 3rem; font-size: 0.875rem;">100%</span>
+                            </div>
+                        </div>
+                        <button class="btn-secondary" id="reset-filters" style="align-self: flex-end; white-space: nowrap;">Reset Filters</button>
                     </div>
                 </div>
 
@@ -218,9 +254,43 @@
 
     <!-- Floating Action Button -->
     <button class="fab" id="fab-target-color" title="Find a target color">🎯</button>
+    
+    <!-- Help Button -->
+    <button class="fab-help" id="fab-help" title="Keyboard shortcuts">⌨️</button>
 
     <!-- Toast Notifications Container -->
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="modal" id="shortcuts-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                <button class="close-btn" id="close-shortcuts-modal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="shortcuts-list">
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>K</kbd> or <kbd>⌘</kbd> + <kbd>K</kbd>
+                        <span>Add new filament</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Esc</kbd>
+                        <span>Close modals and panels</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>?</kbd>
+                        <span>Show this help</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>
+                        <span>Switch between 2D Map / 3D Space / Grid View</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/spectral.js@2.1.0/dist/spectral.min.js"></script>

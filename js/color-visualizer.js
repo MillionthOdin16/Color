@@ -13,6 +13,7 @@ const ColorVisualizer = {
     currentView: '2d',
     combinations: [],
     lightnessFilter: 50,
+    colorFilters: { hueMin: 0, hueMax: 360, satMin: 0, satMax: 100 },
     selectedColor: null,
     onColorClick: null,
 
@@ -60,9 +61,10 @@ const ColorVisualizer = {
     /**
      * Update combinations data
      */
-    update(combinations, lightnessFilter = 50) {
+    update(combinations, lightnessFilter = 50, colorFilters = null) {
         this.combinations = combinations;
         this.lightnessFilter = lightnessFilter;
+        this.colorFilters = colorFilters || { hueMin: 0, hueMax: 360, satMin: 0, satMax: 100 };
         this.render();
     },
 
@@ -107,6 +109,24 @@ const ColorVisualizer = {
             // Filter by lightness (with tolerance)
             const lightnessDiff = Math.abs(hsl.l - this.lightnessFilter);
             if (lightnessDiff > 15) return; // Skip colors too far from current lightness
+
+            // Apply color filters
+            if (this.colorFilters) {
+                // Hue filter (handle wrap-around)
+                const hueMin = this.colorFilters.hueMin;
+                const hueMax = this.colorFilters.hueMax;
+                
+                if (hueMin <= hueMax) {
+                    // Normal range
+                    if (hsl.h < hueMin || hsl.h > hueMax) return;
+                } else {
+                    // Wrap-around range (e.g., 350-10 includes 0)
+                    if (hsl.h < hueMin && hsl.h > hueMax) return;
+                }
+                
+                // Saturation filter
+                if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return;
+            }
 
             // Map to canvas position
             const x = Math.floor((hsl.h / 360) * width);
@@ -293,6 +313,20 @@ const ColorVisualizer = {
         this.combinations.forEach(combo => {
             const hsl = ColorMixer.hexToHsl(combo.color);
 
+            // Apply color filters
+            if (this.colorFilters) {
+                const hueMin = this.colorFilters.hueMin;
+                const hueMax = this.colorFilters.hueMax;
+                
+                if (hueMin <= hueMax) {
+                    if (hsl.h < hueMin || hsl.h > hueMax) return;
+                } else {
+                    if (hsl.h < hueMin && hsl.h > hueMax) return;
+                }
+                
+                if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return;
+            }
+
             // Convert HSL to cylindrical coordinates
             const h = (hsl.h * Math.PI) / 180;
             const s = hsl.s / 100;
@@ -380,8 +414,29 @@ const ColorVisualizer = {
 
         gridContainer.innerHTML = '';
 
+        // Apply color filters
+        let filteredCombos = this.combinations;
+        if (this.colorFilters) {
+            filteredCombos = this.combinations.filter(combo => {
+                const hsl = ColorMixer.hexToHsl(combo.color);
+                
+                const hueMin = this.colorFilters.hueMin;
+                const hueMax = this.colorFilters.hueMax;
+                
+                if (hueMin <= hueMax) {
+                    if (hsl.h < hueMin || hsl.h > hueMax) return false;
+                } else {
+                    if (hsl.h < hueMin && hsl.h > hueMax) return false;
+                }
+                
+                if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return false;
+                
+                return true;
+            });
+        }
+
         // Limit to reasonable number for performance
-        const displayCombos = this.combinations.slice(0, 500);
+        const displayCombos = filteredCombos.slice(0, 500);
 
         displayCombos.forEach(combo => {
             const swatch = document.createElement('div');

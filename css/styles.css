@@ -19,9 +19,9 @@
     --bg-card: #1e293b;
     --bg-elevated: #475569;
 
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
+    --text-primary: #f8fafc;
+    --text-secondary: #e2e8f0;
+    --text-muted: #a0aec0;
 
     --border-color: #334155;
     --border-light: #475569;
@@ -543,10 +543,10 @@ body {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    padding: 0.625rem 1.25rem;
+    padding: 0.75rem 1.5rem;
     border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     transition: all var(--transition-base);
     position: relative;
@@ -906,7 +906,7 @@ body {
 
 .cta-buttons {
     display: flex;
-    gap: 1rem;
+    gap: 1.25rem;
     flex-wrap: wrap;
     justify-content: center;
 }
@@ -962,11 +962,11 @@ body {
 }
 
 .history-item {
-    padding: 0.75rem;
+    padding: 0.875rem;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    margin-bottom: 0.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 0.625rem;
     cursor: pointer;
     transition: all var(--transition-base);
 }
@@ -974,15 +974,16 @@ body {
 .history-item:hover {
     background: var(--bg-elevated);
     border-color: var(--border-light);
-    transform: translateX(4px);
-    box-shadow: var(--shadow-md);
+    transform: translateX(6px);
+    box-shadow: var(--shadow-lg);
 }
 
 .history-color-swatch {
     width: 100%;
-    height: 60px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.5rem;
+    height: 70px;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.625rem;
+    box-shadow: var(--shadow-md);
 }
 
 .history-color-label {
@@ -1156,28 +1157,33 @@ body {
 
 .alternative-item {
     background: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: 1rem;
-    margin-bottom: 0.75rem;
+    border-radius: var(--radius-lg);
+    padding: 1.125rem;
+    margin-bottom: 0.875rem;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-base);
+    border: 1px solid transparent;
 }
 
 .alternative-item:hover {
-    background: var(--bg-primary);
-    transform: translateX(4px);
+    background: var(--bg-elevated);
+    transform: translateX(6px);
+    border-color: var(--border-light);
+    box-shadow: var(--shadow-md);
 }
 
 .alternative-color {
     width: 100%;
-    height: 30px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.5rem;
+    height: 36px;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.625rem;
+    box-shadow: var(--shadow-sm);
 }
 
 .alternative-recipe {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--text-secondary);
+    font-weight: 500;
 }
 
 /* ========================================
@@ -1322,20 +1328,21 @@ body {
 .modal-body input[type="text"],
 .modal-body input[type="color"] {
     width: 100%;
-    padding: 0.875rem 1rem;
+    padding: 1rem 1.25rem;
     border-radius: var(--radius-lg);
     border: 2px solid var(--border-color);
     background: var(--bg-tertiary);
     color: var(--text-primary);
-    font-size: 0.9375rem;
+    font-size: 1rem;
     margin-bottom: 1rem;
     transition: all var(--transition-base);
+    font-weight: 500;
 }
 
 .modal-body input[type="text"]:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), var(--shadow-md);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), var(--shadow-lg);
     background: var(--bg-secondary);
     transform: translateY(-1px);
 }
@@ -1394,13 +1401,13 @@ body {
 
 /* Brand Filter Chips */
 .brand-chip {
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1.125rem;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     background: var(--bg-tertiary);
     color: var(--text-secondary);
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-base);
     white-space: nowrap;
@@ -1411,7 +1418,7 @@ body {
     border-color: var(--primary-color);
     color: var(--text-primary);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
 }
 
 .brand-chip.active {
@@ -1685,6 +1692,10 @@ body {
     .main-content.recipe-open {
         grid-template-columns: 250px 1fr 350px;
     }
+    
+    .filament-inventory {
+        padding: 1.25rem;
+    }
 }
 
 @media (max-width: 968px) {
@@ -1695,7 +1706,8 @@ body {
     .filament-inventory {
         border-right: none;
         border-bottom: 1px solid var(--border-color);
-        max-height: 300px;
+        max-height: 400px;
+        padding: 1.5rem;
     }
 
     .recipe-panel {
@@ -1706,6 +1718,77 @@ body {
         width: 100%;
         max-width: 400px;
         z-index: 50;
+    }
+    
+    .app-header h1 {
+        font-size: 2.25rem;
+    }
+    
+    .tagline {
+        font-size: 1.125rem;
+    }
+    
+    .color-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .app-header {
+        padding: 2rem 1.5rem 2.5rem;
+    }
+    
+    .app-header h1 {
+        font-size: 1.875rem;
+    }
+    
+    .tagline {
+        font-size: 1rem;
+    }
+    
+    .modal-content {
+        max-width: 95%;
+        margin: 1rem;
+    }
+    
+    .color-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.875rem;
+        padding: 1.25rem;
+    }
+    
+    .empty-icon {
+        font-size: 4.5rem;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.5rem;
+    }
+    
+    .empty-state p {
+        font-size: 1rem;
+    }
+    
+    .step {
+        padding: 1.25rem;
+    }
+    
+    .fab {
+        width: 56px;
+        height: 56px;
+        font-size: 1.5rem;
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+    
+    .fab-help {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        bottom: 1.5rem;
+        right: 4.5rem;
     }
 }
 
@@ -1899,12 +1982,12 @@ select:focus-visible {
    Color Preset Chips
    ======================================== */
 .preset-chip {
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1.125rem;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
     color: var(--text-secondary);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-base);
@@ -1928,8 +2011,9 @@ select:focus-visible {
 .preset-chip:hover {
     background: var(--bg-elevated);
     border-color: var(--border-light);
+    color: var(--text-primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
 .preset-chip:hover::before {
@@ -1940,7 +2024,7 @@ select:focus-visible {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     border-color: var(--primary-light);
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), var(--shadow-md);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5), var(--shadow-md);
     transform: translateY(-2px);
 }
 

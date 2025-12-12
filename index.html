@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filament Color Mixer - Discover Your Palette</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🎨 Filament Color Mixer</h1>
+            <p class="tagline">Discover what colors you can create with your filaments</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Sidebar: Filament Inventory -->
+            <aside class="filament-inventory">
+                <div class="inventory-header">
+                    <h2>Your Filaments</h2>
+                    <div class="stats">
+                        <span class="stat-badge" id="filament-count">0 filaments</span>
+                        <span class="stat-badge" id="color-count">0 colors possible</span>
+                    </div>
+                </div>
+
+                <!-- Add Filament Section -->
+                <div class="add-filament-section">
+                    <button class="btn-primary" id="add-filament-btn">+ Add Filament</button>
+                    <button class="btn-secondary" id="load-samples-btn">Load Sample Set</button>
+                </div>
+
+                <!-- Filament List -->
+                <div class="filament-list" id="filament-list">
+                    <!-- Filaments will be populated here -->
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="filter-controls">
+                    <h3>Mix Types</h3>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="filter-2way" checked>
+                        <span>2-way mixes</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="filter-3way" checked>
+                        <span>3-way mixes</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="filter-4way" checked>
+                        <span>4-way mixes</span>
+                    </label>
+                </div>
+
+                <!-- Active Filament Filter -->
+                <div class="active-filter">
+                    <h3>Active Filaments</h3>
+                    <p class="hint">Uncheck to exclude from mixing</p>
+                    <div id="active-filament-checkboxes">
+                        <!-- Checkboxes will be populated here -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center: Color Visualization -->
+            <main class="color-visualization">
+                <div class="viz-controls">
+                    <div class="view-toggle">
+                        <button class="toggle-btn active" data-view="2d">2D Map</button>
+                        <button class="toggle-btn" data-view="3d">3D Space</button>
+                        <button class="toggle-btn" data-view="grid">Grid View</button>
+                    </div>
+
+                    <div class="lightness-control">
+                        <label for="lightness-slider">Lightness</label>
+                        <input type="range" id="lightness-slider" min="0" max="100" value="50">
+                        <span id="lightness-value">50%</span>
+                    </div>
+                </div>
+
+                <!-- 2D Canvas View -->
+                <div class="viz-container active" id="viz-2d">
+                    <canvas id="color-canvas" width="800" height="600"></canvas>
+                    <div class="canvas-overlay">
+                        <div class="hover-tooltip" id="hover-tooltip"></div>
+                    </div>
+                </div>
+
+                <!-- 3D View -->
+                <div class="viz-container" id="viz-3d">
+                    <div id="three-container"></div>
+                    <div class="controls-hint">🖱️ Drag to rotate • Scroll to zoom • Click to select</div>
+                </div>
+
+                <!-- Grid View -->
+                <div class="viz-container" id="viz-grid">
+                    <div class="color-grid" id="color-grid">
+                        <!-- Color swatches will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-state" id="loading-state">
+                    <div class="spinner"></div>
+                    <p>Calculating color combinations...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">🎨</div>
+                    <h3>Add some filaments to get started!</h3>
+                    <p>Click "Add Filament" or "Load Sample Set" to see what colors you can create</p>
+                </div>
+            </main>
+
+            <!-- Right Panel: Recipe Details -->
+            <aside class="recipe-panel" id="recipe-panel">
+                <div class="panel-header">
+                    <h2>Color Recipe</h2>
+                    <button class="close-btn" id="close-recipe">×</button>
+                </div>
+
+                <div class="recipe-content" id="recipe-content">
+                    <!-- Recipe details will be populated here -->
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Add Filament Modal -->
+    <div class="modal" id="add-filament-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Filament</h2>
+                <button class="close-btn" id="close-modal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="search-section">
+                    <label for="filament-search">Search FilamentColors.xyz</label>
+                    <input type="text" id="filament-search" placeholder="e.g., Bambu Lab PLA Blue">
+                    <div class="search-results" id="search-results">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="manual-entry">
+                    <label for="manual-brand">Manual Entry</label>
+                    <input type="text" id="manual-brand" placeholder="Brand (e.g., Bambu Lab)">
+                    <input type="text" id="manual-material" placeholder="Material (e.g., PLA Basic)">
+                    <input type="text" id="manual-color-name" placeholder="Color Name (e.g., Blue)">
+                    <div class="color-picker-group">
+                        <input type="color" id="manual-color-picker" value="#0066CC">
+                        <input type="text" id="manual-hex" placeholder="#0066CC" maxlength="7">
+                    </div>
+                    <button class="btn-primary" id="add-manual-btn">Add Filament</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Target Color Search Modal -->
+    <div class="modal" id="target-color-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎯 Find a Target Color</h2>
+                <button class="close-btn" id="close-target-modal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <label for="target-color-picker">Target Color</label>
+                <div class="color-picker-group">
+                    <input type="color" id="target-color-picker" value="#FF5733">
+                    <input type="text" id="target-hex" placeholder="#FF5733" maxlength="7">
+                </div>
+                <button class="btn-primary" id="find-matches-btn">Find Closest Matches</button>
+
+                <div class="matches-container" id="matches-container">
+                    <!-- Matches will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab-target-color" title="Find a target color">🎯</button>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/spectral.js@2.1.0/dist/spectral.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/color-mixer.js"></script>
+    <script src="js/color-visualizer.js"></script>
+    <script src="js/filament-manager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

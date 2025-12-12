@@ -558,8 +558,15 @@ const FilamentManager = {
             return;
         }
 
-        // Find matches
-        const matches = ColorMixer.findClosestMatches(targetHex, combinations, 10);
+        // Find matches using Delta E if available, otherwise fallback to RGB similarity
+        let matches;
+        if (typeof DeltaE !== 'undefined') {
+            matches = DeltaE.findClosestMatches(targetHex, combinations, 10);
+            Toast.success(`Found ${matches.length} matching colors using Delta E 2000!`);
+        } else {
+            matches = ColorMixer.findClosestMatches(targetHex, combinations, 10);
+            Toast.success(`Found ${matches.length} matching color combinations!`);
+        }
 
         // Display results
         const container = document.getElementById('matches-container');
@@ -572,20 +579,22 @@ const FilamentManager = {
             return;
         }
 
-        Toast.success(`Found ${matches.length} matching color combinations!`);
-
         matches.forEach((match, index) => {
             const item = document.createElement('div');
             item.className = 'alternative-item';
 
             const matchPercent = Math.round(match.similarity * 100);
+            const deltaEValue = match.deltaE !== undefined ? match.deltaE.toFixed(2) : null;
 
             item.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
                     <strong>${index + 1}.</strong>
                     <div style="width: 40px; height: 40px; background: ${match.color}; border-radius: 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
                     <div style="flex: 1;">
-                        <div style="font-weight: 600;">${matchPercent}% match</div>
+                        <div style="font-weight: 600;">
+                            ${matchPercent}% match
+                            ${deltaEValue !== null ? `<span style="font-size: 0.75rem; color: #94a3b8;"> (ΔE: ${deltaEValue})</span>` : ''}
+                        </div>
                         <div style="font-size: 0.875rem; color: #cbd5e1;">${match.recipe}</div>
                     </div>
                 </div>

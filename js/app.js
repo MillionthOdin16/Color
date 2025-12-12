@@ -491,23 +491,40 @@ const App = {
     },
 
     /**
-     * Find alternative recipes for similar colors
+     * Find alternative recipes for similar colors using Delta E if available
      */
     findAlternativeRecipes(combo) {
-        const similar = this.combinations.filter(c => {
-            if (c.id === combo.id) return false;
+        if (typeof DeltaE !== 'undefined') {
+            // Use Delta E for more accurate color matching
+            const alternatives = this.combinations
+                .filter(c => c.id !== combo.id)
+                .map(c => ({
+                    ...c,
+                    deltaE: DeltaE.deltaE2000(c.color, combo.color),
+                    similarity: DeltaE.similarityFromDeltaE(DeltaE.deltaE2000(c.color, combo.color))
+                }))
+                .filter(c => c.deltaE < 10) // Delta E < 10 is noticeable but similar
+                .sort((a, b) => a.deltaE - b.deltaE)
+                .slice(0, 5);
+            
+            return alternatives;
+        } else {
+            // Fallback to RGB similarity
+            const similar = this.combinations.filter(c => {
+                if (c.id === combo.id) return false;
 
-            const similarity = ColorMixer.colorSimilarity(c.color, combo.color);
-            return similarity > 0.85;
-        });
+                const similarity = ColorMixer.colorSimilarity(c.color, combo.color);
+                return similarity > 0.85;
+            });
 
-        return similar
-            .sort((a, b) => {
-                const simA = ColorMixer.colorSimilarity(a.color, combo.color);
-                const simB = ColorMixer.colorSimilarity(b.color, combo.color);
-                return simB - simA;
-            })
-            .slice(0, 5);
+            return similar
+                .sort((a, b) => {
+                    const simA = ColorMixer.colorSimilarity(a.color, combo.color);
+                    const simB = ColorMixer.colorSimilarity(b.color, combo.color);
+                    return simB - simA;
+                })
+                .slice(0, 5);
+        }
     },
 
     /**

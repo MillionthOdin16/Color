@@ -12,6 +12,9 @@
         <header class="app-header">
             <h1>🎨 Filament Color Mixer</h1>
             <p class="tagline">Discover what colors you can create with your filaments</p>
+            <button id="help-btn" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-size: 0.875rem; font-weight: 600; backdrop-filter: blur(10px); transition: all var(--transition-base);" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                ⌨️ Shortcuts
+            </button>
         </header>
 
         <!-- Main Content -->
@@ -19,17 +22,38 @@
             <!-- Left Sidebar: Filament Inventory -->
             <aside class="filament-inventory">
                 <div class="inventory-header">
-                    <h2>Your Filaments</h2>
+                    <h3>Your Filaments</h3>
                     <div class="stats">
                         <span class="stat-badge" id="filament-count">0 filaments</span>
                         <span class="stat-badge" id="color-count">0 colors possible</span>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <select id="filament-sort" style="width: 100%; padding: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 0.875rem; cursor: pointer;">
+                            <option value="dateAdded">Sort: Recently Added</option>
+                            <option value="brand">Sort: Brand A-Z</option>
+                            <option value="color">Sort: Color Name A-Z</option>
+                            <option value="material">Sort: Material</option>
+                        </select>
                     </div>
                 </div>
 
                 <!-- Add Filament Section -->
                 <div class="add-filament-section">
                     <button class="btn-primary" id="add-filament-btn">+ Add Filament</button>
-                    <button class="btn-secondary" id="load-samples-btn">Load Sample Set</button>
+                    <button class="btn-secondary" id="load-samples-btn">📦 Load Samples</button>
+                </div>
+
+                <!-- Inventory Management -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <button class="btn-secondary" id="export-filaments-btn" style="flex: 1; font-size: 0.875rem; padding: 0.5rem;">
+                        💾 Export
+                    </button>
+                    <button class="btn-secondary" id="import-filaments-btn" style="flex: 1; font-size: 0.875rem; padding: 0.5rem;">
+                        📥 Import
+                    </button>
+                    <button class="btn-secondary" id="clear-all-btn" style="flex: 1; font-size: 0.875rem; padding: 0.5rem; background: rgba(244, 67, 54, 0.2); border-color: rgba(244, 67, 54, 0.3);">
+                        🗑️ Clear
+                    </button>
                 </div>
 
                 <!-- Filament List -->
@@ -42,21 +66,27 @@
                     <h3>Mix Types <span class="info-icon" title="Different combinations of filaments">ℹ️</span></h3>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-2way" checked>
-                        <span>2-way mixes <span class="hint-text">(2 colors)</span></span>
+                        <span>2-way mixes <span class="hint-text" id="combo-count-2">(0)</span></span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-3way" checked>
-                        <span>3-way mixes <span class="hint-text">(3 colors)</span></span>
+                        <span>3-way mixes <span class="hint-text" id="combo-count-3">(0)</span></span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-4way" checked>
-                        <span>4-way mixes <span class="hint-text">(4 colors)</span></span>
+                        <span>4-way mixes <span class="hint-text" id="combo-count-4">(0)</span></span>
                     </label>
                 </div>
 
                 <!-- Active Filament Filter -->
                 <div class="active-filter">
-                    <h3>Active Filaments</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h3>Active Filaments</h3>
+                        <div style="display: flex; gap: 0.25rem;">
+                            <button id="select-all-active" class="icon-btn" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Select All">All</button>
+                            <button id="select-none-active" class="icon-btn" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Deselect All">None</button>
+                        </div>
+                    </div>
                     <p class="hint">Uncheck to exclude from mixing</p>
                     <div id="active-filament-checkboxes">
                         <!-- Checkboxes will be populated here -->
@@ -72,12 +102,26 @@
                         <button class="toggle-btn" data-view="3d">3D Space</button>
                         <button class="toggle-btn" data-view="grid">Grid View</button>
                     </div>
-
+                    
                     <div class="lightness-control">
-                        <label for="lightness-slider">Lightness</label>
+                        <label for="lightness-slider" style="display: flex; align-items: center; gap: 0.25rem;">
+                            <span>💡</span>
+                            <span>Lightness</span>
+                        </label>
                         <input type="range" id="lightness-slider" min="0" max="100" value="50">
-                        <span id="lightness-value">50%</span>
+                        <span id="lightness-value" style="min-width: 3rem; text-align: right; font-weight: 600;">50%</span>
                     </div>
+                </div>
+                
+                <!-- Color Preset Filters -->
+                <div style="padding: 0 1rem 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                    <span style="color: var(--text-secondary); font-size: 0.875rem; display: flex; align-items: center; font-weight: 600;">Quick filters:</span>
+                    <button class="preset-chip active" data-preset="all">✨ All</button>
+                    <button class="preset-chip" data-preset="warm">🔥 Warm</button>
+                    <button class="preset-chip" data-preset="cool">❄️ Cool</button>
+                    <button class="preset-chip" data-preset="neutral">⚪ Neutral</button>
+                    <button class="preset-chip" data-preset="vibrant">🌈 Vibrant</button>
+                    <button class="preset-chip" data-preset="pastel">🎀 Pastel</button>
                 </div>
 
                 <!-- 2D Canvas View -->
@@ -143,6 +187,27 @@
             </main>
 
             <!-- Right Panel: Recipe Details -->
+            <!-- Right Sidebar: Recent & Favorites -->
+            <aside class="history-panel" id="history-panel">
+                <div class="history-tabs">
+                    <button class="history-tab active" data-tab="recent">🕒 Recent</button>
+                    <button class="history-tab" data-tab="favorites">⭐ Favorites</button>
+                </div>
+                
+                <div class="history-content active" id="recent-colors">
+                    <p class="hint-text" style="padding: 1rem; text-align: center;">
+                        Recently viewed colors will appear here
+                    </p>
+                </div>
+                
+                <div class="history-content" id="favorite-colors">
+                    <p class="hint-text" style="padding: 1rem; text-align: center;">
+                        Your favorite colors will appear here
+                    </p>
+                </div>
+            </aside>
+
+            <!-- Recipe Panel -->
             <aside class="recipe-panel" id="recipe-panel">
                 <div class="panel-header">
                     <h2>Color Recipe</h2>
@@ -167,8 +232,20 @@
             <div class="modal-body">
                 <div class="search-section">
                     <label for="filament-search">Search Filaments</label>
-                    <p class="search-hint">Search our database of popular filament colors from major brands</p>
-                    <input type="text" id="filament-search" placeholder="e.g., Bambu Lab Blue, Hatchbox Red">
+                    <p class="search-hint">Search 120+ filament colors from popular brands</p>
+                    
+                    <!-- Brand Filter Chips -->
+                    <div class="brand-filters" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                        <button class="brand-chip active" data-brand="all">All Brands</button>
+                        <button class="brand-chip" data-brand="Bambu Lab">Bambu Lab</button>
+                        <button class="brand-chip" data-brand="Polymaker">Polymaker</button>
+                        <button class="brand-chip" data-brand="Hatchbox">Hatchbox</button>
+                        <button class="brand-chip" data-brand="Prusament">Prusament</button>
+                        <button class="brand-chip" data-brand="eSUN">eSUN</button>
+                        <button class="brand-chip" data-brand="Overture">Overture</button>
+                    </div>
+                    
+                    <input type="text" id="filament-search" placeholder="e.g., Red, Blue, or browse below...">
                     <div class="search-results" id="search-results">
                         <!-- Search results will appear here -->
                     </div>
@@ -216,8 +293,58 @@
         </div>
     </div>
 
+    <!-- Edit Filament Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Filament</h2>
+                <button class="close-btn" id="close-edit-modal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="manual-entry">
+                    <label for="edit-brand">Filament Details</label>
+                    <input type="text" id="edit-brand" placeholder="Brand (e.g., Bambu Lab)">
+                    <input type="text" id="edit-material" placeholder="Material (e.g., PLA Basic)">
+                    <input type="text" id="edit-color-name" placeholder="Color Name (e.g., Blue)">
+                    <div class="color-picker-group">
+                        <input type="color" id="edit-color-picker" value="#0066CC">
+                        <input type="text" id="edit-hex" placeholder="#0066CC" maxlength="7">
+                    </div>
+                    <button class="btn-primary" id="save-edit-btn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Floating Action Button -->
     <button class="fab" id="fab-target-color" title="Find a target color">🎯</button>
+
+    <!-- Keyboard Shortcuts Help -->
+    <div class="modal" id="shortcuts-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                <button class="close-btn" id="close-shortcuts">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                        <span>Add Filament</span>
+                        <kbd style="background: var(--bg-primary); padding: 0.375rem 0.625rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875rem;">Ctrl/⌘ + K</kbd>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                        <span>Close Modal/Panel</span>
+                        <kbd style="background: var(--bg-primary); padding: 0.375rem 0.625rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875rem;">Esc</kbd>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                        <span>Show Shortcuts</span>
+                        <kbd style="background: var(--bg-primary); padding: 0.375rem 0.625rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875rem;">?</kbd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Notifications Container -->
     <div class="toast-container" id="toast-container"></div>

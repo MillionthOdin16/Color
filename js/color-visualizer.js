@@ -198,13 +198,28 @@ const ColorVisualizer = {
             tooltip.classList.add('visible');
             tooltip.style.left = `${e.clientX + 15}px`;
             tooltip.style.top = `${e.clientY + 15}px`;
+            
+            // Build enhanced tooltip with filament swatches
+            const filamentSwatches = combo.filaments.map((f, i) => 
+                `<div style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem;">
+                    <div style="width: 12px; height: 12px; background: ${f.hexColor}; border-radius: 2px; border: 1px solid rgba(255,255,255,0.3);"></div>
+                    <span style="color: #cbd5e1;">${combo.percentages[i]}% ${f.colorName}</span>
+                </div>`
+            ).join('');
+            
             tooltip.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <div style="width: 24px; height: 24px; background: ${combo.color}; border-radius: 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
-                    <strong>${combo.color}</strong>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <div style="width: 32px; height: 32px; background: ${combo.color}; border-radius: 6px; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>
+                    <div>
+                        <strong style="display: block; font-size: 0.875rem;">${combo.color}</strong>
+                        <span style="font-size: 0.7rem; color: #94a3b8;">${combo.type}</span>
+                    </div>
                 </div>
-                <div style="font-size: 0.75rem; color: #cbd5e1;">
-                    ${combo.recipe}
+                <div style="display: flex; flex-direction: column; gap: 3px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    ${filamentSwatches}
+                </div>
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; color: #94a3b8; text-align: center;">
+                    Click to view recipe
                 </div>
             `;
             this.canvas.style.cursor = 'pointer';

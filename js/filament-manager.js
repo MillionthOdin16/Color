@@ -8,6 +8,8 @@ const FilamentManager = {
     activeFilaments: new Set(),
     searchTimeout: null,
     onUpdate: null,
+    selectedBrand: 'all', // Track selected brand filter
+    sortBy: 'dateAdded', // Track sort order
 
     /**
      * Initialize manager
@@ -32,6 +34,20 @@ const FilamentManager = {
             this.loadSampleFilaments();
         });
 
+        // Clear all button
+        document.getElementById('clear-all-btn')?.addEventListener('click', () => {
+            this.clearAllFilaments();
+        });
+
+        // Export/Import buttons
+        document.getElementById('export-filaments-btn')?.addEventListener('click', () => {
+            this.exportFilaments();
+        });
+
+        document.getElementById('import-filaments-btn')?.addEventListener('click', () => {
+            this.importFilaments();
+        });
+
         // Modal close buttons
         document.getElementById('close-modal')?.addEventListener('click', () => {
             this.closeAddModal();
@@ -39,6 +55,10 @@ const FilamentManager = {
 
         document.getElementById('close-target-modal')?.addEventListener('click', () => {
             this.closeTargetModal();
+        });
+
+        document.getElementById('close-edit-modal')?.addEventListener('click', () => {
+            this.closeEditModal();
         });
 
         // Click outside modal to close
@@ -66,6 +86,11 @@ const FilamentManager = {
             this.addManualFilament();
         });
 
+        // Edit save button
+        document.getElementById('save-edit-btn')?.addEventListener('click', () => {
+            this.saveEditedFilament();
+        });
+
         // Color picker sync with hex input
         const colorPicker = document.getElementById('manual-color-picker');
         const hexInput = document.getElementById('manual-hex');
@@ -82,6 +107,22 @@ const FilamentManager = {
             });
         }
 
+        // Edit color picker sync
+        const editColorPicker = document.getElementById('edit-color-picker');
+        const editHexInput = document.getElementById('edit-hex');
+
+        if (editColorPicker && editHexInput) {
+            editColorPicker.addEventListener('input', (e) => {
+                editHexInput.value = e.target.value;
+            });
+
+            editHexInput.addEventListener('input', (e) => {
+                if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                    editColorPicker.value = e.target.value;
+                }
+            });
+        }
+
         // FAB target color button
         document.getElementById('fab-target-color')?.addEventListener('click', () => {
             this.openTargetModal();
@@ -90,6 +131,39 @@ const FilamentManager = {
         // Find matches button
         document.getElementById('find-matches-btn')?.addEventListener('click', () => {
             this.findTargetColorMatches();
+        });
+        
+        // Brand filter chips
+        document.querySelectorAll('.brand-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                // Update active state
+                document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // Update selected brand
+                this.selectedBrand = e.target.getAttribute('data-brand');
+                
+                // Trigger search with current query
+                const searchInput = document.getElementById('filament-search');
+                if (searchInput) {
+                    this.handleSearch(searchInput.value);
+                }
+            });
+        });
+        
+        // Select all/none buttons
+        document.getElementById('select-all-btn')?.addEventListener('click', () => {
+            this.selectAllFilaments();
+        });
+        
+        document.getElementById('select-none-btn')?.addEventListener('click', () => {
+            this.selectNoneFilaments();
+        });
+        
+        // Sort dropdown
+        document.getElementById('filament-sort')?.addEventListener('change', (e) => {
+            this.sortBy = e.target.value;
+            this.render();
         });
     },
 
@@ -160,6 +234,58 @@ const FilamentManager = {
             this.onUpdate();
         }
     },
+    
+    /**
+     * Select all filaments
+     */
+    selectAllFilaments() {
+        this.filaments.forEach(f => this.activeFilaments.add(f.id));
+        this.renderActiveCheckboxes();
+        Toast.success('All filaments selected');
+        
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+    
+    /**
+     * Deselect all filaments
+     */
+    selectNoneFilaments() {
+        this.activeFilaments.clear();
+        this.renderActiveCheckboxes();
+        Toast.info('All filaments deselected');
+        
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+    
+    /**
+     * Get sorted filaments based on current sort setting
+     */
+    getSortedFilaments() {
+        const sorted = [...this.filaments];
+        
+        switch (this.sortBy) {
+            case 'brand':
+                sorted.sort((a, b) => a.brand.localeCompare(b.brand) || a.colorName.localeCompare(b.colorName));
+                break;
+            case 'color':
+                sorted.sort((a, b) => a.colorName.localeCompare(b.colorName));
+                break;
+            case 'material':
+                sorted.sort((a, b) => a.material.localeCompare(b.material) || a.brand.localeCompare(b.brand));
+                break;
+            case 'dateAdded':
+            default:
+                // Keep original order (most recently added last, so reverse)
+                sorted.reverse();
+                break;
+        }
+        
+        return sorted;
+    },
 
     /**
      * Render filament list
@@ -170,7 +296,22 @@ const FilamentManager = {
 
         listContainer.innerHTML = '';
 
-        this.filaments.forEach(filament => {
+        if (this.filaments.length === 0) {
+            listContainer.innerHTML = `
+                <div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary);">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+                    <p>No filaments yet</p>
+                    <p style="font-size: 0.875rem; margin-top: 0.5rem;">Add filaments or load samples to get started</p>
+                </div>
+            `;
+            this.updateStats();
+            return;
+        }
+        
+        // Sort filaments
+        const sorted = this.getSortedFilaments();
+
+        sorted.forEach(filament => {
             const item = document.createElement('div');
             item.className = 'filament-item';
 
@@ -181,9 +322,21 @@ const FilamentManager = {
                     <div class="filament-details">${filament.brand} ${filament.material}</div>
                 </div>
                 <div class="filament-actions">
+                    <button class="icon-btn" data-action="duplicate" data-id="${filament.id}" title="Duplicate">📋</button>
+                    <button class="icon-btn" data-action="edit" data-id="${filament.id}" title="Edit">✏️</button>
                     <button class="icon-btn" data-action="remove" data-id="${filament.id}" title="Remove">🗑️</button>
                 </div>
             `;
+
+            item.querySelector('[data-action="duplicate"]').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.duplicateFilament(filament.id);
+            });
+
+            item.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.editFilament(filament.id);
+            });
 
             item.querySelector('[data-action="remove"]').addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -300,13 +453,14 @@ const FilamentManager = {
     },
 
     /**
-     * Handle search
+     * Handle search with brand filtering
      */
     async handleSearch(query) {
         const resultsContainer = document.getElementById('search-results');
         if (!resultsContainer) return;
 
-        if (!query || query.length < 2) {
+        // If no query and no brand filter, show nothing
+        if ((!query || query.length < 1) && this.selectedBrand === 'all') {
             resultsContainer.innerHTML = '';
             return;
         }
@@ -314,7 +468,19 @@ const FilamentManager = {
         resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center;">Searching...</div>';
 
         try {
-            const results = await FilamentAPI.searchFilaments(query);
+            let results;
+            
+            // If brand filter is active but no query, show all from that brand
+            if (this.selectedBrand !== 'all' && (!query || query.length === 0)) {
+                results = await FilamentAPI.searchFilaments(this.selectedBrand);
+            } else {
+                results = await FilamentAPI.searchFilaments(query || '');
+            }
+            
+            // Apply brand filter if selected
+            if (this.selectedBrand !== 'all') {
+                results = results.filter(r => r.brand === this.selectedBrand);
+            }
 
             if (results.length === 0) {
                 resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #94a3b8;">No results found. Try manual entry below.</div>';
@@ -323,12 +489,12 @@ const FilamentManager = {
 
             resultsContainer.innerHTML = '';
             
-            // Show info badge if using local database
+            // Show info badge
             const usingLocal = results.length > 0 && results[0].source === 'local';
             if (usingLocal) {
                 const infoBanner = document.createElement('div');
                 infoBanner.style.cssText = 'padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; font-size: 0.875rem; color: #94a3b8;';
-                infoBanner.innerHTML = '💡 Showing results from local database (120+ colors)';
+                infoBanner.innerHTML = `💡 Showing ${results.length} color${results.length !== 1 ? 's' : ''} from local database`;
                 resultsContainer.appendChild(infoBanner);
             }
 
@@ -384,24 +550,238 @@ const FilamentManager = {
     },
 
     /**
-     * Load sample filaments
+     * Load sample filaments - Real filaments from popular brands
+     * Curated set of diverse, widely-available colors for realistic mixing
      */
     loadSampleFilaments() {
         const samples = [
+            // Bambu Lab PLA Basic - Popular starter set
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Red', hexColor: '#E31E24' },
             { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Blue', hexColor: '#0066CC' },
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Red', hexColor: '#CC0000' },
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Yellow', hexColor: '#FFCC00' },
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'White', hexColor: '#FFFFFF' },
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Black', hexColor: '#000000' },
-            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Green', hexColor: '#00AA00' },
-            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Orange', hexColor: '#FF6600' },
-            { brand: 'eSUN', material: 'PLA+', colorName: 'Purple', hexColor: '#9933CC' },
-            { brand: 'Hatchbox', material: 'PLA', colorName: 'Cyan', hexColor: '#00CCCC' },
-            { brand: 'Prusament', material: 'PLA', colorName: 'Magenta', hexColor: '#CC0099' }
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Yellow', hexColor: '#FFD700' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'White', hexColor: '#F5F5F5' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Black', hexColor: '#1C1C1C' },
+            
+            // Polymaker PolyLite PLA - Vibrant colors
+            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Army Green', hexColor: '#4B5320' },
+            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Orange', hexColor: '#FF6F00' },
+            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Teal', hexColor: '#00897B' },
+            
+            // eSUN PLA+ - Quality mid-range
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Purple', hexColor: '#9370DB' },
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Light Blue', hexColor: '#87CEFA' },
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Pink', hexColor: '#FFC0CB' },
+            
+            // Hatchbox PLA - Reliable staples
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'True Red', hexColor: '#E53935' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'True Green', hexColor: '#2E7D32' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'Brown', hexColor: '#6D4C41' },
+            
+            // Prusament PLA - Premium quality
+            { brand: 'Prusament', material: 'PLA', colorName: 'Prusa Orange', hexColor: '#FF6B35' },
+            { brand: 'Prusament', material: 'PLA', colorName: 'Azure Blue', hexColor: '#0077BE' },
+            
+            // CC3D Silk - Special finishes
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Gold', hexColor: '#FFD700' },
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Silver', hexColor: '#C0C0C0' }
         ];
 
+        // Clear existing filaments first
+        if (this.filaments.length > 0) {
+            const confirmClear = confirm(`You have ${this.filaments.length} filaments. Replace them with samples?`);
+            if (!confirmClear) return;
+            this.filaments = [];
+            this.activeFilaments.clear();
+        }
+
         samples.forEach(sample => this.addFilament({ ...sample, source: 'sample' }));
-        Toast.success(`Loaded ${samples.length} sample filaments!`);
+        Toast.success(`Loaded ${samples.length} curated real-world filaments! 🎨`);
+    },
+    
+    /**
+     * Duplicate a filament
+     */
+    duplicateFilament(id) {
+        const original = this.filaments.find(f => f.id === id);
+        if (!original) return;
+        
+        const duplicate = {
+            brand: original.brand,
+            material: original.material,
+            colorName: `${original.colorName} (Copy)`,
+            hexColor: original.hexColor,
+            source: 'manual'
+        };
+        
+        this.addFilament(duplicate);
+        Toast.success(`Duplicated ${original.colorName}`);
+    },
+
+    /**
+     * Edit filament
+     */
+    editFilament(id) {
+        const filament = this.filaments.find(f => f.id === id);
+        if (!filament) return;
+
+        this.editingFilamentId = id;
+
+        // Populate edit form
+        document.getElementById('edit-brand').value = filament.brand;
+        document.getElementById('edit-material').value = filament.material;
+        document.getElementById('edit-color-name').value = filament.colorName;
+        document.getElementById('edit-hex').value = filament.hexColor;
+        document.getElementById('edit-color-picker').value = filament.hexColor;
+
+        // Open edit modal
+        document.getElementById('edit-modal')?.classList.add('visible');
+    },
+
+    /**
+     * Save edited filament
+     */
+    saveEditedFilament() {
+        const brand = document.getElementById('edit-brand').value.trim();
+        const material = document.getElementById('edit-material').value.trim();
+        const colorName = document.getElementById('edit-color-name').value.trim();
+        const hexColor = document.getElementById('edit-hex').value.trim();
+
+        if (!brand || !material || !colorName || !hexColor) {
+            Toast.warning('Please fill in all fields');
+            return;
+        }
+
+        if (!/^#[0-9A-F]{6}$/i.test(hexColor)) {
+            Toast.error('Invalid hex color format');
+            return;
+        }
+
+        const filament = this.filaments.find(f => f.id === this.editingFilamentId);
+        if (filament) {
+            filament.brand = brand;
+            filament.material = material;
+            filament.colorName = colorName;
+            filament.hexColor = hexColor.toUpperCase();
+
+            this.saveFilaments();
+            this.render();
+
+            Toast.success(`Updated ${colorName}`);
+        }
+
+        this.closeEditModal();
+    },
+
+    /**
+     * Close edit modal
+     */
+    closeEditModal() {
+        document.getElementById('edit-modal')?.classList.remove('visible');
+        this.editingFilamentId = null;
+    },
+
+    /**
+     * Clear all filaments
+     */
+    clearAllFilaments() {
+        if (this.filaments.length === 0) {
+            Toast.info('No filaments to clear');
+            return;
+        }
+
+        const confirmed = confirm(`Are you sure you want to remove all ${this.filaments.length} filaments?`);
+        if (!confirmed) return;
+
+        this.filaments = [];
+        this.activeFilaments.clear();
+        this.saveFilaments();
+        this.render();
+
+        Toast.info('All filaments cleared');
+
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+
+    /**
+     * Export filaments to JSON
+     */
+    exportFilaments() {
+        if (this.filaments.length === 0) {
+            Toast.warning('No filaments to export');
+            return;
+        }
+
+        const data = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            filaments: this.filaments
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `filament-inventory-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        Toast.success('Filaments exported successfully!');
+    },
+
+    /**
+     * Import filaments from JSON
+     */
+    importFilaments() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+
+                    if (!data.filaments || !Array.isArray(data.filaments)) {
+                        Toast.error('Invalid file format');
+                        return;
+                    }
+
+                    const confirmReplace = this.filaments.length > 0 
+                        ? confirm(`You have ${this.filaments.length} filaments. Replace them with imported data?`)
+                        : true;
+
+                    if (!confirmReplace) return;
+
+                    this.filaments = [];
+                    this.activeFilaments.clear();
+
+                    data.filaments.forEach(filament => {
+                        this.addFilament({
+                            brand: filament.brand,
+                            material: filament.material,
+                            colorName: filament.colorName,
+                            hexColor: filament.hexColor,
+                            source: 'import'
+                        });
+                    });
+
+                    Toast.success(`Imported ${data.filaments.length} filaments!`);
+                } catch (error) {
+                    Toast.error('Failed to import filaments: Invalid JSON');
+                    console.error(error);
+                }
+            };
+
+            reader.readAsText(file);
+        };
+
+        input.click();
     },
 
     /**
@@ -476,5 +856,27 @@ const FilamentManager = {
 
             container.appendChild(item);
         });
+    },
+    
+    /**
+     * Select all active filaments
+     */
+    selectAllActive() {
+        this.filaments.forEach(f => {
+            this.activeFilaments.add(f.id);
+        });
+        this.render();
+        if (this.onUpdate) this.onUpdate();
+        Toast.success('All filaments selected');
+    },
+    
+    /**
+     * Deselect all active filaments
+     */
+    selectNoneActive() {
+        this.activeFilaments.clear();
+        this.render();
+        if (this.onUpdate) this.onUpdate();
+        Toast.info('All filaments deselected');
     }
 };

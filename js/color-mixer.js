@@ -78,14 +78,23 @@ const ColorMixer = {
     /**
      * Generate all possible 2-way combinations
      */
+<<<<<<< HEAD
     generateTwoWayCombinations(filaments, activeFilaments, granularity = 5) {
+=======
+    generateTwoWayCombinations(filaments, activeFilaments) {
+>>>>>>> origin/copilot/analyze-usability-changes
         const combinations = [];
         const active = filaments.filter(f => activeFilaments.has(f.id));
 
         for (let i = 0; i < active.length; i++) {
             for (let j = i + 1; j < active.length; j++) {
+<<<<<<< HEAD
                 // Sample at specified granularity
                 for (let pct = granularity; pct <= 100 - granularity; pct += granularity) {
+=======
+                // Sample at different ratios
+                for (let pct = 10; pct <= 90; pct += 10) {
+>>>>>>> origin/copilot/analyze-usability-changes
                     const ratio = pct / 100;
                     const mixedColor = this.mixTwo(
                         active[i].hexColor,
@@ -118,16 +127,23 @@ const ColorMixer = {
         for (let i = 0; i < active.length; i++) {
             for (let j = i + 1; j < active.length; j++) {
                 for (let k = j + 1; k < active.length; k++) {
+<<<<<<< HEAD
                     // Enhanced ratio samples with more granular options
                     const ratioSamples = [
                         // Equal parts
                         [33, 33, 34],
                         // One dominant
+=======
+                    // Sample various ratios (to keep it manageable)
+                    const ratioSamples = [
+                        [33, 33, 34],
+>>>>>>> origin/copilot/analyze-usability-changes
                         [50, 25, 25],
                         [25, 50, 25],
                         [25, 25, 50],
                         [60, 20, 20],
                         [20, 60, 20],
+<<<<<<< HEAD
                         [20, 20, 60],
                         [70, 15, 15],
                         [15, 70, 15],
@@ -142,6 +158,9 @@ const ColorMixer = {
                         [35, 20, 45],
                         [20, 45, 35],
                         [20, 35, 45]
+=======
+                        [20, 20, 60]
+>>>>>>> origin/copilot/analyze-usability-changes
                     ];
 
                     for (const percentages of ratioSamples) {
@@ -179,6 +198,7 @@ const ColorMixer = {
             for (let j = i + 1; j < active.length; j++) {
                 for (let k = j + 1; k < active.length; k++) {
                     for (let l = k + 1; l < active.length; l++) {
+<<<<<<< HEAD
                         // Enhanced ratio samples with more variations
                         const ratioSamples = [
                             // Equal parts
@@ -200,6 +220,15 @@ const ColorMixer = {
                             [40, 20, 30, 10],
                             [30, 40, 20, 10],
                             [30, 40, 10, 20]
+=======
+                        // Sample key ratios
+                        const ratioSamples = [
+                            [25, 25, 25, 25],
+                            [40, 30, 20, 10],
+                            [40, 20, 30, 10],
+                            [40, 20, 10, 30],
+                            [50, 20, 20, 10]
+>>>>>>> origin/copilot/analyze-usability-changes
                         ];
 
                         for (const percentages of ratioSamples) {
@@ -231,12 +260,20 @@ const ColorMixer = {
     /**
      * Generate all combinations based on filters
      */
+<<<<<<< HEAD
     generateAllCombinations(filaments, activeFilaments, filters, granularity = 5) {
+=======
+    generateAllCombinations(filaments, activeFilaments, filters) {
+>>>>>>> origin/copilot/analyze-usability-changes
         let combinations = [];
 
         if (filters.twoWay) {
             combinations = combinations.concat(
+<<<<<<< HEAD
                 this.generateTwoWayCombinations(filaments, activeFilaments, granularity)
+=======
+                this.generateTwoWayCombinations(filaments, activeFilaments)
+>>>>>>> origin/copilot/analyze-usability-changes
             );
         }
 

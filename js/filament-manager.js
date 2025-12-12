@@ -8,9 +8,12 @@ const FilamentManager = {
     activeFilaments: new Set(),
     searchTimeout: null,
     onUpdate: null,
+<<<<<<< HEAD
     undoStack: [],
     redoStack: [],
     maxUndoStackSize: 20,
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
 
     /**
      * Initialize manager
@@ -94,6 +97,7 @@ const FilamentManager = {
         document.getElementById('find-matches-btn')?.addEventListener('click', () => {
             this.findTargetColorMatches();
         });
+<<<<<<< HEAD
 
         // Export filaments button
         document.getElementById('export-filaments-btn')?.addEventListener('click', () => {
@@ -124,6 +128,8 @@ const FilamentManager = {
                 this.redo();
             }
         });
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
     },
 
     /**
@@ -142,6 +148,7 @@ const FilamentManager = {
     },
 
     /**
+<<<<<<< HEAD
      * Save state to undo stack
      */
     saveToUndoStack() {
@@ -227,6 +234,11 @@ const FilamentManager = {
      * Add filament (internal - no undo tracking)
      */
     _addFilamentInternal(filament, showToast = true) {
+=======
+     * Add filament
+     */
+    addFilament(filament) {
+>>>>>>> origin/copilot/analyze-usability-changes
         filament.id = filament.id || `fil-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         this.filaments.push(filament);
         this.activeFilaments.add(filament.id);
@@ -234,9 +246,13 @@ const FilamentManager = {
         this.render();
 
         // Show success toast
+<<<<<<< HEAD
         if (showToast) {
             Toast.success(`Added ${filament.colorName} to your inventory`);
         }
+=======
+        Toast.success(`Added ${filament.colorName} to your inventory`);
+>>>>>>> origin/copilot/analyze-usability-changes
 
         if (this.onUpdate) {
             this.onUpdate();
@@ -244,6 +260,7 @@ const FilamentManager = {
     },
 
     /**
+<<<<<<< HEAD
      * Add filament (with undo tracking)
      */
     addFilament(filament, showToast = true) {
@@ -254,12 +271,15 @@ const FilamentManager = {
     },
 
     /**
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
      * Remove filament
      */
     removeFilament(id) {
         const filament = this.filaments.find(f => f.id === id);
         const colorName = filament ? filament.colorName : 'Filament';
         
+<<<<<<< HEAD
         // Show confirmation dialog
         if (!confirm(`Remove ${colorName} from your inventory?\n\nThis will recalculate all color combinations.`)) {
             return;
@@ -268,13 +288,20 @@ const FilamentManager = {
         // Save state for undo
         this.saveToUndoStack();
         
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
         this.filaments = this.filaments.filter(f => f.id !== id);
         this.activeFilaments.delete(id);
         this.saveFilaments();
         this.render();
 
+<<<<<<< HEAD
         // Show success toast
         Toast.success(`Removed ${colorName} from inventory`);
+=======
+        // Show info toast
+        Toast.info(`Removed ${colorName} from inventory`);
+>>>>>>> origin/copilot/analyze-usability-changes
 
         if (this.onUpdate) {
             this.onUpdate();
@@ -569,6 +596,7 @@ const FilamentManager = {
             return;
         }
 
+<<<<<<< HEAD
         // Find matches using Delta E if available, otherwise fallback to RGB similarity
         let matches;
         if (typeof DeltaE !== 'undefined') {
@@ -578,6 +606,10 @@ const FilamentManager = {
             matches = ColorMixer.findClosestMatches(targetHex, combinations, 10);
             Toast.success(`Found ${matches.length} matching color combinations!`);
         }
+=======
+        // Find matches
+        const matches = ColorMixer.findClosestMatches(targetHex, combinations, 10);
+>>>>>>> origin/copilot/analyze-usability-changes
 
         // Display results
         const container = document.getElementById('matches-container');
@@ -590,22 +622,34 @@ const FilamentManager = {
             return;
         }
 
+<<<<<<< HEAD
+=======
+        Toast.success(`Found ${matches.length} matching color combinations!`);
+
+>>>>>>> origin/copilot/analyze-usability-changes
         matches.forEach((match, index) => {
             const item = document.createElement('div');
             item.className = 'alternative-item';
 
             const matchPercent = Math.round(match.similarity * 100);
+<<<<<<< HEAD
             const deltaEValue = match.deltaE !== undefined ? match.deltaE.toFixed(2) : null;
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
 
             item.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
                     <strong>${index + 1}.</strong>
                     <div style="width: 40px; height: 40px; background: ${match.color}; border-radius: 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
                     <div style="flex: 1;">
+<<<<<<< HEAD
                         <div style="font-weight: 600;">
                             ${matchPercent}% match
                             ${deltaEValue !== null ? `<span style="font-size: 0.75rem; color: #94a3b8;"> (ΔE: ${deltaEValue})</span>` : ''}
                         </div>
+=======
+                        <div style="font-weight: 600;">${matchPercent}% match</div>
+>>>>>>> origin/copilot/analyze-usability-changes
                         <div style="font-size: 0.875rem; color: #cbd5e1;">${match.recipe}</div>
                     </div>
                 </div>
@@ -620,6 +664,7 @@ const FilamentManager = {
 
             container.appendChild(item);
         });
+<<<<<<< HEAD
     },
 
     /**
@@ -731,5 +776,7 @@ const FilamentManager = {
         
         // Reset file input
         document.getElementById('import-file-input').value = '';
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
     }
 };

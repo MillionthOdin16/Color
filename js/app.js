@@ -10,6 +10,7 @@ const App = {
         threeWay: true,
         fourWay: true
     },
+<<<<<<< HEAD
     mixGranularity: 5,
     lightnessFilter: 50,
     colorFilters: {
@@ -18,6 +19,9 @@ const App = {
         satMin: 0,
         satMax: 100
     },
+=======
+    lightnessFilter: 50,
+>>>>>>> origin/copilot/analyze-usability-changes
 
     /**
      * Initialize application
@@ -39,9 +43,12 @@ const App = {
         this.updateUIState();
         this.updateCombinations();
 
+<<<<<<< HEAD
         // Check for shared recipe in URL
         this.checkForSharedRecipe();
 
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
         // Expose app to window for debugging
         window.app = this;
 
@@ -88,6 +95,7 @@ const App = {
             this.updateCombinations();
         });
 
+<<<<<<< HEAD
         // Mix granularity selector
         document.getElementById('mix-granularity')?.addEventListener('change', (e) => {
             this.mixGranularity = parseInt(e.target.value);
@@ -160,6 +168,8 @@ const App = {
             this.updateVisualization();
         });
 
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
         // Close recipe panel
         document.getElementById('close-recipe')?.addEventListener('click', () => {
             this.closeRecipe();
@@ -181,13 +191,17 @@ const App = {
                 this.closeRecipe();
                 FilamentManager.closeAddModal();
                 FilamentManager.closeTargetModal();
+<<<<<<< HEAD
                 this.closeShortcutsModal();
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
             }
             // Ctrl/Cmd + K to open add filament
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
                 FilamentManager.openAddModal();
             }
+<<<<<<< HEAD
             // ? to show keyboard shortcuts
             if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 e.preventDefault();
@@ -221,6 +235,8 @@ const App = {
         // Export palette button
         document.getElementById('export-palette-btn')?.addEventListener('click', () => {
             this.exportPalette();
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
         });
     },
 
@@ -262,8 +278,12 @@ const App = {
             this.combinations = ColorMixer.generateAllCombinations(
                 FilamentManager.filaments,
                 FilamentManager.activeFilaments,
+<<<<<<< HEAD
                 this.filters,
                 this.mixGranularity
+=======
+                this.filters
+>>>>>>> origin/copilot/analyze-usability-changes
             );
 
             const endTime = performance.now();
@@ -280,9 +300,12 @@ const App = {
 
             // Hide loading state
             document.getElementById('loading-state')?.classList.remove('visible');
+<<<<<<< HEAD
 
             // Show pending shared recipe if any
             this.showPendingSharedRecipe();
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
         }, 50);
     },
 
@@ -290,7 +313,11 @@ const App = {
      * Update visualization
      */
     updateVisualization() {
+<<<<<<< HEAD
         ColorVisualizer.update(this.combinations, this.lightnessFilter, this.colorFilters);
+=======
+        ColorVisualizer.update(this.combinations, this.lightnessFilter);
+>>>>>>> origin/copilot/analyze-usability-changes
     },
 
     /**
@@ -306,6 +333,7 @@ const App = {
         if (!recipePanel || !recipeContent) return;
 
         // Build recipe HTML
+<<<<<<< HEAD
         const colorName = typeof ColorNamer !== 'undefined' ? ColorNamer.getDetailedName(combo.color) : '';
         
         let html = `
@@ -323,6 +351,16 @@ const App = {
                 <button class="btn-share-recipe" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem; background: var(--accent-purple); border: 1px solid var(--accent-purple); border-radius: var(--radius-md); color: white; cursor: pointer; font-size: 0.875rem; transition: all var(--transition-fast); font-weight: 500;">
                     🔗 Share Recipe
                 </button>
+=======
+        let html = `
+            <div class="recipe-color-preview" style="background: ${combo.color}"></div>
+
+            <div class="recipe-info">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Color: ${combo.color}</h3>
+                    <span style="font-size: 0.875rem; color: #94a3b8;">${combo.type}</span>
+                </div>
+>>>>>>> origin/copilot/analyze-usability-changes
 
                 <div>
         `;
@@ -368,6 +406,7 @@ const App = {
 
         recipeContent.innerHTML = html;
 
+<<<<<<< HEAD
         // Add copy to clipboard functionality
         const copyBtn = recipeContent.querySelector('.btn-copy-color');
         if (copyBtn) {
@@ -393,6 +432,8 @@ const App = {
             });
         }
 
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
         // Add event listeners to sliders
         recipeContent.querySelectorAll('.percentage-slider').forEach(slider => {
             slider.addEventListener('input', (e) => {
@@ -494,6 +535,7 @@ const App = {
     },
 
     /**
+<<<<<<< HEAD
      * Find alternative recipes for similar colors using Delta E if available
      */
     findAlternativeRecipes(combo) {
@@ -528,6 +570,25 @@ const App = {
                 })
                 .slice(0, 5);
         }
+=======
+     * Find alternative recipes for similar colors
+     */
+    findAlternativeRecipes(combo) {
+        const similar = this.combinations.filter(c => {
+            if (c.id === combo.id) return false;
+
+            const similarity = ColorMixer.colorSimilarity(c.color, combo.color);
+            return similarity > 0.85;
+        });
+
+        return similar
+            .sort((a, b) => {
+                const simA = ColorMixer.colorSimilarity(a.color, combo.color);
+                const simB = ColorMixer.colorSimilarity(b.color, combo.color);
+                return simB - simA;
+            })
+            .slice(0, 5);
+>>>>>>> origin/copilot/analyze-usability-changes
     },
 
     /**
@@ -539,6 +600,7 @@ const App = {
 
         recipePanel?.classList.remove('open');
         mainContent?.classList.remove('recipe-open');
+<<<<<<< HEAD
     },
 
     /**
@@ -750,6 +812,8 @@ const App = {
         // Copy to clipboard
         this.copyToClipboard(shareUrl);
         Toast.success('Recipe URL copied to clipboard! Share it with others!');
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
     }
 };
 

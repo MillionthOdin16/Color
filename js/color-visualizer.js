@@ -13,7 +13,10 @@ const ColorVisualizer = {
     currentView: '2d',
     combinations: [],
     lightnessFilter: 50,
+<<<<<<< HEAD
     colorFilters: { hueMin: 0, hueMax: 360, satMin: 0, satMax: 100 },
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
     selectedColor: null,
     onColorClick: null,
 
@@ -61,10 +64,16 @@ const ColorVisualizer = {
     /**
      * Update combinations data
      */
+<<<<<<< HEAD
     update(combinations, lightnessFilter = 50, colorFilters = null) {
         this.combinations = combinations;
         this.lightnessFilter = lightnessFilter;
         this.colorFilters = colorFilters || { hueMin: 0, hueMax: 360, satMin: 0, satMax: 100 };
+=======
+    update(combinations, lightnessFilter = 50) {
+        this.combinations = combinations;
+        this.lightnessFilter = lightnessFilter;
+>>>>>>> origin/copilot/analyze-usability-changes
         this.render();
     },
 
@@ -110,6 +119,7 @@ const ColorVisualizer = {
             const lightnessDiff = Math.abs(hsl.l - this.lightnessFilter);
             if (lightnessDiff > 15) return; // Skip colors too far from current lightness
 
+<<<<<<< HEAD
             // Apply color filters
             if (this.colorFilters) {
                 // Hue filter (handle wrap-around)
@@ -128,6 +138,8 @@ const ColorVisualizer = {
                 if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return;
             }
 
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
             // Map to canvas position
             const x = Math.floor((hsl.h / 360) * width);
             const y = Math.floor((1 - hsl.s / 100) * height);
@@ -313,6 +325,7 @@ const ColorVisualizer = {
         this.combinations.forEach(combo => {
             const hsl = ColorMixer.hexToHsl(combo.color);
 
+<<<<<<< HEAD
             // Apply color filters
             if (this.colorFilters) {
                 const hueMin = this.colorFilters.hueMin;
@@ -327,6 +340,8 @@ const ColorVisualizer = {
                 if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return;
             }
 
+=======
+>>>>>>> origin/copilot/analyze-usability-changes
             // Convert HSL to cylindrical coordinates
             const h = (hsl.h * Math.PI) / 180;
             const s = hsl.s / 100;
@@ -406,7 +421,11 @@ const ColorVisualizer = {
     },
 
     /**
+<<<<<<< HEAD
      * Render grid view with batch rendering for better performance
+=======
+     * Render grid view
+>>>>>>> origin/copilot/analyze-usability-changes
      */
     renderGrid() {
         const gridContainer = document.getElementById('color-grid');
@@ -414,6 +433,7 @@ const ColorVisualizer = {
 
         gridContainer.innerHTML = '';
 
+<<<<<<< HEAD
         // Apply color filters
         let filteredCombos = this.combinations;
         if (this.colorFilters) {
@@ -476,6 +496,25 @@ const ColorVisualizer = {
         };
 
         renderBatch();
+=======
+        // Limit to reasonable number for performance
+        const displayCombos = this.combinations.slice(0, 500);
+
+        displayCombos.forEach(combo => {
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.background = combo.color;
+            swatch.setAttribute('data-recipe', combo.recipe);
+
+            swatch.addEventListener('click', () => {
+                if (this.onColorClick) {
+                    this.onColorClick(combo);
+                }
+            });
+
+            gridContainer.appendChild(swatch);
+        });
+>>>>>>> origin/copilot/analyze-usability-changes
     },
 
     /**

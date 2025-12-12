@@ -39,18 +39,18 @@
 
                 <!-- Filter Controls -->
                 <div class="filter-controls">
-                    <h3>Mix Types</h3>
+                    <h3>Mix Types <span class="info-icon" title="Different combinations of filaments">ℹ️</span></h3>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-2way" checked>
-                        <span>2-way mixes</span>
+                        <span>2-way mixes <span class="hint-text">(2 colors)</span></span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-3way" checked>
-                        <span>3-way mixes</span>
+                        <span>3-way mixes <span class="hint-text">(3 colors)</span></span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="filter-4way" checked>
-                        <span>4-way mixes</span>
+                        <span>4-way mixes <span class="hint-text">(4 colors)</span></span>
                     </label>
                 </div>
 
@@ -110,8 +110,35 @@
                 <!-- Empty State -->
                 <div class="empty-state" id="empty-state">
                     <div class="empty-icon">🎨</div>
-                    <h3>Add some filaments to get started!</h3>
-                    <p>Click "Add Filament" or "Load Sample Set" to see what colors you can create</p>
+                    <h3>Welcome to Filament Color Mixer!</h3>
+                    <p>Discover what colors you can create by mixing your 3D printing filaments</p>
+                    <div class="quick-start-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <strong>Add Your Filaments</strong>
+                                <span>Click "+ Add Filament" to search 3000+ real filaments or enter manually</span>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <strong>Explore Color Combinations</strong>
+                                <span>See all possible 2-way, 3-way, and 4-way color mixes</span>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <strong>Get Exact Recipes</strong>
+                                <span>Click any color to see mixing percentages and alternatives</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cta-buttons">
+                        <button class="btn-primary cta-add-filament">+ Add Your First Filament</button>
+                        <button class="btn-secondary cta-load-samples">Or Try Sample Set</button>
+                    </div>
                 </div>
             </main>
 
@@ -139,8 +166,9 @@
 
             <div class="modal-body">
                 <div class="search-section">
-                    <label for="filament-search">Search FilamentColors.xyz</label>
-                    <input type="text" id="filament-search" placeholder="e.g., Bambu Lab PLA Blue">
+                    <label for="filament-search">Search Filaments</label>
+                    <p class="search-hint">Search our database of popular filament colors from major brands</p>
+                    <input type="text" id="filament-search" placeholder="e.g., Bambu Lab Blue, Hatchbox Red">
                     <div class="search-results" id="search-results">
                         <!-- Search results will appear here -->
                     </div>
@@ -191,10 +219,14 @@
     <!-- Floating Action Button -->
     <button class="fab" id="fab-target-color" title="Find a target color">🎯</button>
 
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
     <!-- Scripts -->
     <script src="https://unpkg.com/spectral.js@2.1.0/dist/spectral.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/toast.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/color-mixer.js"></script>

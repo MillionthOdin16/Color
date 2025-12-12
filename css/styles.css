@@ -1709,7 +1709,7 @@ body {
     .filament-inventory {
         border-right: none;
         border-bottom: 1px solid var(--border-color);
-        max-height: 400px;
+        max-height: none;
         padding: 1.5rem;
     }
 
@@ -1719,8 +1719,8 @@ body {
         right: 0;
         bottom: 0;
         width: 100%;
-        max-width: 400px;
-        z-index: 50;
+        max-width: 100%;
+        z-index: 1001;
     }
     
     .app-header h1 {
@@ -1732,23 +1732,49 @@ body {
     }
     
     .color-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.875rem;
         padding: 1.5rem;
+    }
+    
+    .history-panel {
+        display: none;
+    }
+    
+    .viz-controls {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    
+    .view-toggle {
+        order: -1;
+        width: 100%;
+    }
+    
+    .toggle-btn {
+        flex: 1;
+        padding: 0.625rem 0.75rem;
+        font-size: 0.8125rem;
     }
 }
 
 @media (max-width: 640px) {
     .app-header {
-        padding: 2rem 1.5rem 2.5rem;
+        padding: 1.5rem 1rem 2rem;
     }
     
     .app-header h1 {
-        font-size: 1.875rem;
+        font-size: 1.75rem;
+        margin-bottom: 0.375rem;
     }
     
     .tagline {
-        font-size: 1rem;
+        font-size: 0.9375rem;
+    }
+    
+    #help-btn {
+        display: none !important;
     }
     
     .modal-content {
@@ -1756,42 +1782,150 @@ body {
         margin: 1rem;
     }
     
-    .color-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 0.875rem;
+    .modal-header {
         padding: 1.25rem;
     }
     
+    .modal-body {
+        padding: 1.25rem;
+    }
+    
+    .color-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    
     .empty-icon {
-        font-size: 4.5rem;
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
     }
     
     .empty-state h3 {
         font-size: 1.5rem;
+        margin-bottom: 0.75rem;
     }
     
     .empty-state p {
-        font-size: 1rem;
+        font-size: 0.9375rem;
+        margin-bottom: 2rem;
     }
     
     .step {
-        padding: 1.25rem;
+        padding: 1rem;
+        gap: 0.875rem;
+    }
+    
+    .step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 1.125rem;
+    }
+    
+    .step-content strong {
+        font-size: 0.9375rem;
+    }
+    
+    .step-content span {
+        font-size: 0.8125rem;
     }
     
     .fab {
         width: 56px;
         height: 56px;
         font-size: 1.5rem;
-        bottom: 1.5rem;
-        right: 1.5rem;
+        bottom: 1.25rem;
+        right: 1.25rem;
     }
     
     .fab-help {
+        display: none;
+    }
+    
+    .filament-inventory {
+        padding: 1.25rem;
+    }
+    
+    .filament-item {
+        padding: 0.875rem;
+        gap: 0.75rem;
+    }
+    
+    .filament-color-swatch {
         width: 40px;
         height: 40px;
-        font-size: 1rem;
-        bottom: 1.5rem;
-        right: 4.5rem;
+    }
+    
+    .stat-badge {
+        padding: 0.75rem 1.125rem;
+        font-size: 0.875rem;
+    }
+    
+    .btn-primary, .btn-secondary {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
+    }
+    
+    .cta-buttons button {
+        width: 100%;
+    }
+    
+    .viz-controls {
+        padding: 0.875rem;
+        gap: 0.625rem;
+    }
+    
+    .lightness-control {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .lightness-control input[type="range"] {
+        flex: 1;
+        margin: 0 0.75rem;
+    }
+    
+    .preset-chip {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+    }
+    
+    .brand-chip {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+    }
+    
+    .brand-filters {
+        gap: 0.375rem !important;
+    }
+    
+    .quick-start-steps {
+        gap: 1rem;
+    }
+    
+    .recipe-color-preview {
+        height: 150px;
+        margin-bottom: 1.25rem;
+    }
+    
+    .ingredient-item {
+        padding: 1rem;
+    }
+    
+    .modal-body input[type="text"] {
+        padding: 0.875rem 1rem;
+        font-size: 0.9375rem;
+    }
+    
+    .search-result-item {
+        padding: 0.875rem;
+        gap: 0.75rem;
     }
 }
 
@@ -1926,6 +2060,53 @@ input[type="checkbox"]:checked::before {
 input[type="checkbox"]:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* ========================================
+   Touch & Mobile Optimizations
+   ======================================== */
+@media (hover: none) and (pointer: coarse) {
+    /* Touch device optimizations */
+    .btn-primary, .btn-secondary, .icon-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .toggle-btn {
+        min-height: 44px;
+    }
+    
+    .preset-chip, .brand-chip {
+        min-height: 40px;
+    }
+    
+    .checkbox-label input[type="checkbox"] {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .filament-item:hover {
+        transform: none;
+    }
+    
+    .color-swatch:hover {
+        transform: none;
+    }
+    
+    /* Active states for touch */
+    .filament-item:active {
+        transform: scale(0.98);
+        background: var(--bg-elevated);
+    }
+    
+    .color-swatch:active {
+        transform: scale(0.95);
+    }
+    
+    .btn-primary:active {
+        transform: scale(0.97);
+    }
 }
 
 /* ========================================

@@ -39,6 +39,9 @@ const App = {
         this.updateUIState();
         this.updateCombinations();
 
+        // Check for shared recipe in URL
+        this.checkForSharedRecipe();
+
         // Expose app to window for debugging
         window.app = this;
 
@@ -300,16 +303,22 @@ const App = {
         if (!recipePanel || !recipeContent) return;
 
         // Build recipe HTML
+        const colorName = typeof ColorNamer !== 'undefined' ? ColorNamer.getDetailedName(combo.color) : '';
+        
         let html = `
             <div class="recipe-color-preview" style="background: ${combo.color}" title="Click to copy color code"></div>
 
             <div class="recipe-info">
+                ${colorName ? `<div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">${colorName}</div>` : ''}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <h3 style="margin: 0;">Color: ${combo.color}</h3>
+                    <h3 style="margin: 0; font-size: ${colorName ? '0.875rem' : '1rem'}; color: ${colorName ? 'var(--text-secondary)' : 'var(--text-primary)'};">${combo.color}</h3>
                     <span style="font-size: 0.875rem; color: #94a3b8;">${combo.type}</span>
                 </div>
-                <button class="btn-copy-color" data-color="${combo.color}" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer; font-size: 0.875rem; transition: all var(--transition-fast);">
+                <button class="btn-copy-color" data-color="${combo.color}" style="width: 100%; margin-bottom: 0.5rem; padding: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer; font-size: 0.875rem; transition: all var(--transition-fast);">
                     📋 Copy Color Code
+                </button>
+                <button class="btn-share-recipe" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem; background: var(--accent-purple); border: 1px solid var(--accent-purple); border-radius: var(--radius-md); color: white; cursor: pointer; font-size: 0.875rem; transition: all var(--transition-fast); font-weight: 500;">
+                    🔗 Share Recipe
                 </button>
 
                 <div>
@@ -361,6 +370,14 @@ const App = {
         if (copyBtn) {
             copyBtn.addEventListener('click', () => {
                 this.copyToClipboard(combo.color);
+            });
+        }
+
+        // Add share recipe functionality
+        const shareBtn = recipeContent.querySelector('.btn-share-recipe');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', () => {
+                this.shareRecipe(combo);
             });
         }
 
@@ -635,6 +652,74 @@ const App = {
         URL.revokeObjectURL(url);
 
         Toast.success(`Exported ${palette.colors.length} colors to palette file!`);
+    },
+
+    /**
+     * Check for shared recipe in URL parameters
+     */
+    checkForSharedRecipe() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const recipe = urlParams.get('recipe');
+        
+        if (recipe) {
+            try {
+                const recipeData = JSON.parse(decodeURIComponent(recipe));
+                
+                // Validate recipe data
+                if (recipeData.filaments && recipeData.percentages && recipeData.color) {
+                    // Show a toast notification
+                    Toast.success('Loaded shared recipe from URL!');
+                    
+                    // Wait a bit for combinations to generate, then show recipe
+                    setTimeout(() => {
+                        // Try to find matching combination
+                        const matchingCombo = this.combinations.find(c => c.color === recipeData.color);
+                        
+                        if (matchingCombo) {
+                            this.showRecipe(matchingCombo);
+                        } else {
+                            // Create a temporary combo object from the URL data
+                            const tempCombo = {
+                                id: 'shared',
+                                type: `${recipeData.filaments.length}-way`,
+                                color: recipeData.color,
+                                filaments: recipeData.filaments,
+                                percentages: recipeData.percentages,
+                                recipe: recipeData.recipe
+                            };
+                            this.showRecipe(tempCombo);
+                        }
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Failed to parse shared recipe:', error);
+                Toast.error('Failed to load shared recipe');
+            }
+        }
+    },
+
+    /**
+     * Share current recipe via URL
+     */
+    shareRecipe(combo) {
+        const recipeData = {
+            filaments: combo.filaments.map(f => ({
+                brand: f.brand,
+                material: f.material,
+                colorName: f.colorName,
+                hexColor: f.hexColor
+            })),
+            percentages: combo.percentages,
+            color: combo.color,
+            recipe: combo.recipe
+        };
+        
+        const recipeParam = encodeURIComponent(JSON.stringify(recipeData));
+        const shareUrl = `${window.location.origin}${window.location.pathname}?recipe=${recipeParam}`;
+        
+        // Copy to clipboard
+        this.copyToClipboard(shareUrl);
+        Toast.success('Recipe URL copied to clipboard! Share it with others!');
     }
 };
 

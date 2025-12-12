@@ -13,6 +13,7 @@ const ColorVisualizer = {
     currentView: '2d',
     combinations: [],
     lightnessFilter: 50,
+    colorFilters: { hueMin: 0, hueMax: 360, satMin: 0, satMax: 100 },
     selectedColor: null,
     onColorClick: null,
 
@@ -60,9 +61,10 @@ const ColorVisualizer = {
     /**
      * Update combinations data
      */
-    update(combinations, lightnessFilter = 50) {
+    update(combinations, lightnessFilter = 50, colorFilters = null) {
         this.combinations = combinations;
         this.lightnessFilter = lightnessFilter;
+        this.colorFilters = colorFilters || { hueMin: 0, hueMax: 360, satMin: 0, satMax: 100 };
         this.render();
     },
 
@@ -107,6 +109,24 @@ const ColorVisualizer = {
             // Filter by lightness (with tolerance)
             const lightnessDiff = Math.abs(hsl.l - this.lightnessFilter);
             if (lightnessDiff > 15) return; // Skip colors too far from current lightness
+
+            // Apply color filters
+            if (this.colorFilters) {
+                // Hue filter (handle wrap-around)
+                const hueMin = this.colorFilters.hueMin;
+                const hueMax = this.colorFilters.hueMax;
+
+                if (hueMin <= hueMax) {
+                    // Normal range
+                    if (hsl.h < hueMin || hsl.h > hueMax) return;
+                } else {
+                    // Wrap-around range (e.g., 350-10 includes 0)
+                    if (hsl.h < hueMin && hsl.h > hueMax) return;
+                }
+
+                // Saturation filter
+                if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return;
+            }
 
             // Map to canvas position
             const x = Math.floor((hsl.h / 360) * width);
@@ -308,6 +328,20 @@ const ColorVisualizer = {
         this.combinations.forEach(combo => {
             const hsl = ColorMixer.hexToHsl(combo.color);
 
+            // Apply color filters
+            if (this.colorFilters) {
+                const hueMin = this.colorFilters.hueMin;
+                const hueMax = this.colorFilters.hueMax;
+
+                if (hueMin <= hueMax) {
+                    if (hsl.h < hueMin || hsl.h > hueMax) return;
+                } else {
+                    if (hsl.h < hueMin && hsl.h > hueMax) return;
+                }
+
+                if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return;
+            }
+
             // Convert HSL to cylindrical coordinates
             const h = (hsl.h * Math.PI) / 180;
             const s = hsl.s / 100;
@@ -387,7 +421,7 @@ const ColorVisualizer = {
     },
 
     /**
-     * Render grid view
+     * Render grid view with batch rendering for better performance
      */
     renderGrid() {
         const gridContainer = document.getElementById('color-grid');
@@ -395,23 +429,68 @@ const ColorVisualizer = {
 
         gridContainer.innerHTML = '';
 
-        // Limit to reasonable number for performance
-        const displayCombos = this.combinations.slice(0, 500);
+        // Apply color filters
+        let filteredCombos = this.combinations;
+        if (this.colorFilters) {
+            filteredCombos = this.combinations.filter(combo => {
+                const hsl = ColorMixer.hexToHsl(combo.color);
 
-        displayCombos.forEach(combo => {
-            const swatch = document.createElement('div');
-            swatch.className = 'color-swatch';
-            swatch.style.background = combo.color;
-            swatch.setAttribute('data-recipe', combo.recipe);
+                const hueMin = this.colorFilters.hueMin;
+                const hueMax = this.colorFilters.hueMax;
 
-            swatch.addEventListener('click', () => {
-                if (this.onColorClick) {
-                    this.onColorClick(combo);
+                if (hueMin <= hueMax) {
+                    if (hsl.h < hueMin || hsl.h > hueMax) return false;
+                } else {
+                    if (hsl.h < hueMin && hsl.h > hueMax) return false;
                 }
-            });
 
-            gridContainer.appendChild(swatch);
-        });
+                if (hsl.s < this.colorFilters.satMin || hsl.s > this.colorFilters.satMax) return false;
+
+                return true;
+            });
+        }
+
+        // Limit to reasonable number for performance
+        const displayCombos = filteredCombos.slice(0, 1000);
+
+        // Batch render for better performance
+        const batchSize = 100;
+        let currentBatch = 0;
+
+        const renderBatch = () => {
+            const start = currentBatch * batchSize;
+            const end = Math.min(start + batchSize, displayCombos.length);
+
+            const fragment = document.createDocumentFragment();
+
+            for (let i = start; i < end; i++) {
+                const combo = displayCombos[i];
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.background = combo.color;
+                swatch.setAttribute('data-recipe', combo.recipe);
+                swatch.setAttribute('data-color', combo.color);
+                swatch.title = combo.recipe;
+
+                swatch.addEventListener('click', () => {
+                    if (this.onColorClick) {
+                        this.onColorClick(combo);
+                    }
+                });
+
+                fragment.appendChild(swatch);
+            }
+
+            gridContainer.appendChild(fragment);
+
+            currentBatch++;
+
+            if (end < displayCombos.length) {
+                requestAnimationFrame(renderBatch);
+            }
+        };
+
+        renderBatch();
     },
 
     /**

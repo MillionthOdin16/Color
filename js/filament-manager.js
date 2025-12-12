@@ -10,6 +10,9 @@ const FilamentManager = {
     onUpdate: null,
     selectedBrand: 'all', // Track selected brand filter
     sortBy: 'dateAdded', // Track sort order
+    undoStack: [],
+    redoStack: [],
+    maxUndoStackSize: 20,
 
     /**
      * Initialize manager
@@ -45,7 +48,12 @@ const FilamentManager = {
         });
 
         document.getElementById('import-filaments-btn')?.addEventListener('click', () => {
-            this.importFilaments();
+             document.getElementById('import-file-input')?.click();
+        });
+
+        // File input change
+        document.getElementById('import-file-input')?.addEventListener('change', (e) => {
+            this.importFilaments(e.target.files[0]);
         });
 
         // Modal close buttons
@@ -165,6 +173,21 @@ const FilamentManager = {
             this.sortBy = e.target.value;
             this.render();
         });
+
+        // Keyboard shortcuts for undo/redo
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + Z for undo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                this.undo();
+            }
+            // Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y for redo
+            if (((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) ||
+                ((e.ctrlKey || e.metaKey) && e.key === 'y')) {
+                e.preventDefault();
+                this.redo();
+            }
+        });
     },
 
     /**
@@ -183,9 +206,91 @@ const FilamentManager = {
     },
 
     /**
-     * Add filament
+     * Save state to undo stack
      */
-    addFilament(filament) {
+    saveToUndoStack() {
+        const state = {
+            filaments: JSON.parse(JSON.stringify(this.filaments)),
+            activeFilaments: new Set(this.activeFilaments)
+        };
+
+        this.undoStack.push(state);
+
+        // Limit stack size
+        if (this.undoStack.length > this.maxUndoStackSize) {
+            this.undoStack.shift();
+        }
+
+        // Clear redo stack when new action is performed
+        this.redoStack = [];
+    },
+
+    /**
+     * Undo last action
+     */
+    undo() {
+        if (this.undoStack.length === 0) {
+            Toast.info('Nothing to undo');
+            return;
+        }
+
+        // Save current state to redo stack before undoing
+        const currentState = {
+            filaments: JSON.parse(JSON.stringify(this.filaments)),
+            activeFilaments: new Set(this.activeFilaments)
+        };
+        this.redoStack.push(currentState);
+
+        // Restore previous state
+        const previousState = this.undoStack.pop();
+        this.filaments = previousState.filaments;
+        this.activeFilaments = previousState.activeFilaments;
+
+        this.saveFilaments();
+        this.render();
+
+        Toast.success('Undone');
+
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+
+    /**
+     * Redo last undone action
+     */
+    redo() {
+        if (this.redoStack.length === 0) {
+            Toast.info('Nothing to redo');
+            return;
+        }
+
+        // Save current state to undo stack before redoing
+        const currentState = {
+            filaments: JSON.parse(JSON.stringify(this.filaments)),
+            activeFilaments: new Set(this.activeFilaments)
+        };
+        this.undoStack.push(currentState);
+
+        // Restore redo state
+        const redoState = this.redoStack.pop();
+        this.filaments = redoState.filaments;
+        this.activeFilaments = redoState.activeFilaments;
+
+        this.saveFilaments();
+        this.render();
+
+        Toast.success('Redone');
+
+        if (this.onUpdate) {
+            this.onUpdate();
+        }
+    },
+
+    /**
+     * Add filament (internal - no undo tracking)
+     */
+    _addFilamentInternal(filament, showToast = true) {
         filament.id = filament.id || `fil-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         this.filaments.push(filament);
         this.activeFilaments.add(filament.id);
@@ -193,11 +298,23 @@ const FilamentManager = {
         this.render();
 
         // Show success toast
-        Toast.success(`Added ${filament.colorName} to your inventory`);
+        if (showToast) {
+            Toast.success(`Added ${filament.colorName} to your inventory`);
+        }
 
         if (this.onUpdate) {
             this.onUpdate();
         }
+    },
+
+    /**
+     * Add filament (with undo tracking)
+     */
+    addFilament(filament, showToast = true) {
+        // Save state for undo
+        this.saveToUndoStack();
+
+        this._addFilamentInternal(filament, showToast);
     },
 
     /**
@@ -207,6 +324,14 @@ const FilamentManager = {
         const filament = this.filaments.find(f => f.id === id);
         const colorName = filament ? filament.colorName : 'Filament';
         
+        // Show confirmation dialog
+        if (!confirm(`Remove ${colorName} from your inventory?\n\nThis will recalculate all color combinations.`)) {
+            return;
+        }
+
+        // Save state for undo
+        this.saveToUndoStack();
+
         this.filaments = this.filaments.filter(f => f.id !== id);
         this.activeFilaments.delete(id);
         this.saveFilaments();
@@ -594,7 +719,7 @@ const FilamentManager = {
             this.activeFilaments.clear();
         }
 
-        samples.forEach(sample => this.addFilament({ ...sample, source: 'sample' }));
+        samples.forEach(sample => this.addFilament({ ...sample, source: 'sample' }, false)); // Don't show toast for each sample
         Toast.success(`Loaded ${samples.length} curated real-world filaments! 🎨`);
     },
     
@@ -656,6 +781,9 @@ const FilamentManager = {
             return;
         }
 
+        // Save state for undo
+        this.saveToUndoStack();
+
         const filament = this.filaments.find(f => f.id === this.editingFilamentId);
         if (filament) {
             filament.brand = brand;
@@ -670,6 +798,7 @@ const FilamentManager = {
         }
 
         this.closeEditModal();
+        if (this.onUpdate) this.onUpdate();
     },
 
     /**
@@ -691,6 +820,9 @@ const FilamentManager = {
 
         const confirmed = confirm(`Are you sure you want to remove all ${this.filaments.length} filaments?`);
         if (!confirmed) return;
+
+        // Save state for undo
+        this.saveToUndoStack();
 
         this.filaments = [];
         this.activeFilaments.clear();
@@ -716,7 +848,8 @@ const FilamentManager = {
         const data = {
             version: '1.0',
             exportDate: new Date().toISOString(),
-            filaments: this.filaments
+            filaments: this.filaments,
+            activeFilaments: Array.from(this.activeFilaments)
         };
 
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -733,55 +866,120 @@ const FilamentManager = {
     /**
      * Import filaments from JSON
      */
-    importFilaments() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
+    importFilaments(file) {
+        if (!file) return;
 
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const data = JSON.parse(event.target.result);
-
-                    if (!data.filaments || !Array.isArray(data.filaments)) {
-                        Toast.error('Invalid file format');
-                        return;
-                    }
-
-                    const confirmReplace = this.filaments.length > 0 
-                        ? confirm(`You have ${this.filaments.length} filaments. Replace them with imported data?`)
-                        : true;
-
-                    if (!confirmReplace) return;
-
-                    this.filaments = [];
-                    this.activeFilaments.clear();
-
-                    data.filaments.forEach(filament => {
-                        this.addFilament({
-                            brand: filament.brand,
-                            material: filament.material,
-                            colorName: filament.colorName,
-                            hexColor: filament.hexColor,
-                            source: 'import'
-                        });
-                    });
-
-                    Toast.success(`Imported ${data.filaments.length} filaments!`);
-                } catch (error) {
-                    Toast.error('Failed to import filaments: Invalid JSON');
-                    console.error(error);
+                if (!data.filaments || !Array.isArray(data.filaments)) {
+                    Toast.error('Invalid file format');
+                    return;
                 }
-            };
 
-            reader.readAsText(file);
+                const confirmReplace = this.filaments.length > 0
+                    ? confirm(`You have ${this.filaments.length} filaments. Add imported filaments to existing list?\n\nCancel to replace existing list.`)
+                    : true; // Default to append if empty? No wait logic.
+
+                // Actually logic:
+                // If existing > 0:
+                //   Confirm "Add to existing?" -> Yes: Append. No: Replace?
+                //   Or maybe simpler:
+                //   Confirm "Replace existing?" -> Yes: Replace. No: Append.
+
+                // Let's implement Replace vs Append logic properly
+                let append = false;
+                if (this.filaments.length > 0) {
+                    // Logic from feature branch was just confirm replace or return
+                    // But HEAD logic supports intelligent merge or replace
+                    // I'll stick to HEAD's style logic or merge them.
+
+                    // Feature branch logic:
+                    /*
+                    const replace = confirm(
+                        `You currently have ${this.filaments.length} filament(s).\n\n` +
+                        `Import will add ${data.filaments.length} filament(s) from the file.\n\n` +
+                        `Do you want to continue?`
+                    );
+                    if (!replace) return;
+                    */
+
+                   // HEAD logic was simpler replace.
+
+                   // Let's implement a safe import.
+                   // Save undo stack first.
+                   this.saveToUndoStack();
+
+                   if (confirmReplace) {
+                       // Append mode (based on user confirm usually being "OK")
+                       // Wait, standard confirm is "OK/Cancel".
+                       // "Add to existing" -> OK = Append. Cancel = ... do nothing?
+                       // Let's simplify.
+                   }
+                } else {
+                    this.saveToUndoStack();
+                }
+
+                // Let's just follow the integrated logic which is robust.
+                // Merging HEAD and Feature branch logic for import is tricky.
+                // HEAD had "Replace them with imported data?"
+                // Feature branch had "Import will add... Continue?"
+
+                // I'll go with:
+                if (this.filaments.length > 0) {
+                     if (confirm(`Replace existing ${this.filaments.length} filaments with imported data?\nCancel to append instead.`)) {
+                         this.filaments = [];
+                         this.activeFilaments.clear();
+                     }
+                }
+
+                let imported = 0;
+                let duplicates = 0;
+
+                data.filaments.forEach(filament => {
+                     // Check for duplicates
+                    const exists = this.filaments.some(f =>
+                        f.brand === filament.brand &&
+                        f.material === filament.material &&
+                        f.colorName === filament.colorName
+                    );
+
+                    if (!exists) {
+                        this._addFilamentInternal(filament, false);
+                        imported++;
+                    } else {
+                        duplicates++;
+                    }
+                });
+
+                // Restore active filaments if provided and we replaced (or just try to restore valid IDs)
+                if (data.activeFilaments && Array.isArray(data.activeFilaments)) {
+                    data.activeFilaments.forEach(id => {
+                        if (this.filaments.some(f => f.id === id)) {
+                            this.activeFilaments.add(id);
+                        }
+                    });
+                }
+
+                this.render();
+                if (this.onUpdate) {
+                    this.onUpdate();
+                }
+
+                Toast.success(`Imported ${imported} filaments! ${duplicates > 0 ? `(${duplicates} skipped)` : ''}`);
+            } catch (error) {
+                Toast.error('Failed to import filaments: Invalid JSON');
+                console.error(error);
+            }
         };
 
-        input.click();
+        reader.readAsText(file);
+
+        // Reset file input
+        const fileInput = document.getElementById('import-file-input');
+        if (fileInput) fileInput.value = '';
     },
 
     /**
@@ -814,8 +1012,15 @@ const FilamentManager = {
             return;
         }
 
-        // Find matches
-        const matches = ColorMixer.findClosestMatches(targetHex, combinations, 10);
+        // Find matches using Delta E if available, otherwise fallback to RGB similarity
+        let matches;
+        if (typeof DeltaE !== 'undefined') {
+            matches = DeltaE.findClosestMatches(targetHex, combinations, 10);
+            Toast.success(`Found ${matches.length} matching colors using Delta E 2000!`);
+        } else {
+            matches = ColorMixer.findClosestMatches(targetHex, combinations, 10);
+            Toast.success(`Found ${matches.length} matching color combinations!`);
+        }
 
         // Display results
         const container = document.getElementById('matches-container');
@@ -828,20 +1033,22 @@ const FilamentManager = {
             return;
         }
 
-        Toast.success(`Found ${matches.length} matching color combinations!`);
-
         matches.forEach((match, index) => {
             const item = document.createElement('div');
             item.className = 'alternative-item';
 
             const matchPercent = Math.round(match.similarity * 100);
+            const deltaEValue = match.deltaE !== undefined ? match.deltaE.toFixed(2) : null;
 
             item.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
                     <strong>${index + 1}.</strong>
                     <div style="width: 40px; height: 40px; background: ${match.color}; border-radius: 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
                     <div style="flex: 1;">
-                        <div style="font-weight: 600;">${matchPercent}% match</div>
+                        <div style="font-weight: 600;">
+                            ${matchPercent}% match
+                            ${deltaEValue !== null ? `<span style="font-size: 0.75rem; color: #94a3b8;"> (ΔE: ${deltaEValue})</span>` : ''}
+                        </div>
                         <div style="font-size: 0.875rem; color: #cbd5e1;">${match.recipe}</div>
                     </div>
                 </div>

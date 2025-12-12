@@ -183,8 +183,20 @@
             <div class="modal-body">
                 <div class="search-section">
                     <label for="filament-search">Search Filaments</label>
-                    <p class="search-hint">Search our database of popular filament colors from major brands</p>
-                    <input type="text" id="filament-search" placeholder="e.g., Bambu Lab Blue, Hatchbox Red">
+                    <p class="search-hint">Search 120+ filament colors from popular brands</p>
+                    
+                    <!-- Brand Filter Chips -->
+                    <div class="brand-filters" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                        <button class="brand-chip active" data-brand="all">All Brands</button>
+                        <button class="brand-chip" data-brand="Bambu Lab">Bambu Lab</button>
+                        <button class="brand-chip" data-brand="Polymaker">Polymaker</button>
+                        <button class="brand-chip" data-brand="Hatchbox">Hatchbox</button>
+                        <button class="brand-chip" data-brand="Prusament">Prusament</button>
+                        <button class="brand-chip" data-brand="eSUN">eSUN</button>
+                        <button class="brand-chip" data-brand="Overture">Overture</button>
+                    </div>
+                    
+                    <input type="text" id="filament-search" placeholder="e.g., Red, Blue, or browse below...">
                     <div class="search-results" id="search-results">
                         <!-- Search results will appear here -->
                     </div>

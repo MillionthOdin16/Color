@@ -1222,6 +1222,40 @@ body {
     transform: translateX(6px) scale(0.98);
 }
 
+/* Brand Filter Chips */
+.brand-chip {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.brand-chip:hover {
+    background: var(--bg-elevated);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.brand-chip.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-color: var(--primary-light);
+    color: white;
+    font-weight: 600;
+    box-shadow: var(--shadow-glow);
+}
+
+.brand-chip.active:hover {
+    transform: translateY(-2px) scale(1.05);
+}
+
 .divider {
     text-align: center;
     margin: 1.5rem 0;

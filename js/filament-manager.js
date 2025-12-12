@@ -8,6 +8,7 @@ const FilamentManager = {
     activeFilaments: new Set(),
     searchTimeout: null,
     onUpdate: null,
+    selectedBrand: 'all', // Track selected brand filter
 
     /**
      * Initialize manager
@@ -232,10 +233,16 @@ const FilamentManager = {
                     <div class="filament-details">${filament.brand} ${filament.material}</div>
                 </div>
                 <div class="filament-actions">
+                    <button class="icon-btn" data-action="duplicate" data-id="${filament.id}" title="Duplicate">📋</button>
                     <button class="icon-btn" data-action="edit" data-id="${filament.id}" title="Edit">✏️</button>
                     <button class="icon-btn" data-action="remove" data-id="${filament.id}" title="Remove">🗑️</button>
                 </div>
             `;
+
+            item.querySelector('[data-action="duplicate"]').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.duplicateFilament(filament.id);
+            });
 
             item.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -442,36 +449,39 @@ const FilamentManager = {
 
     /**
      * Load sample filaments - Real filaments from popular brands
+     * Curated set of diverse, widely-available colors for realistic mixing
      */
     loadSampleFilaments() {
         const samples = [
-            // Bambu Lab PLA Basic
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Red', hexColor: '#D32F2F' },
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Blue', hexColor: '#1976D2' },
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Yellow', hexColor: '#FBC02D' },
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'White', hexColor: '#FAFAFA' },
-            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Black', hexColor: '#212121' },
+            // Bambu Lab PLA Basic - Popular starter set
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Red', hexColor: '#E31E24' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Blue', hexColor: '#0066CC' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Yellow', hexColor: '#FFD700' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'White', hexColor: '#F5F5F5' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Black', hexColor: '#1C1C1C' },
             
-            // Polymaker PolyLite PLA
-            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Army Green', hexColor: '#4A5D23' },
+            // Polymaker PolyLite PLA - Vibrant colors
+            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Army Green', hexColor: '#4B5320' },
             { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Orange', hexColor: '#FF6F00' },
             { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Teal', hexColor: '#00897B' },
             
-            // eSUN PLA+
-            { brand: 'eSUN', material: 'PLA+', colorName: 'Purple', hexColor: '#7B1FA2' },
-            { brand: 'eSUN', material: 'PLA+', colorName: 'Light Blue', hexColor: '#4FC3F7' },
+            // eSUN PLA+ - Quality mid-range
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Purple', hexColor: '#9370DB' },
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Light Blue', hexColor: '#87CEFA' },
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Pink', hexColor: '#FFC0CB' },
             
-            // Hatchbox PLA
-            { brand: 'Hatchbox', material: 'PLA', colorName: 'True Red', hexColor: '#C62828' },
+            // Hatchbox PLA - Reliable staples
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'True Red', hexColor: '#E53935' },
             { brand: 'Hatchbox', material: 'PLA', colorName: 'True Green', hexColor: '#2E7D32' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'Brown', hexColor: '#6D4C41' },
             
-            // Prusament PLA
-            { brand: 'Prusament', material: 'PLA', colorName: 'Galaxy Purple', hexColor: '#6A1B9A' },
-            { brand: 'Prusament', material: 'PLA', colorName: 'Prusa Orange', hexColor: '#F57C00' },
+            // Prusament PLA - Premium quality
+            { brand: 'Prusament', material: 'PLA', colorName: 'Prusa Orange', hexColor: '#FF6B35' },
+            { brand: 'Prusament', material: 'PLA', colorName: 'Azure Blue', hexColor: '#0077BE' },
             
-            // Additional popular colors
-            { brand: 'Overture', material: 'PLA', colorName: 'White', hexColor: '#F5F5F5' },
-            { brand: 'Sunlu', material: 'PLA+', colorName: 'Marble', hexColor: '#E0E0E0' }
+            // CC3D Silk - Special finishes
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Gold', hexColor: '#FFD700' },
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Silver', hexColor: '#C0C0C0' }
         ];
 
         // Clear existing filaments first
@@ -483,7 +493,26 @@ const FilamentManager = {
         }
 
         samples.forEach(sample => this.addFilament({ ...sample, source: 'sample' }));
-        Toast.success(`Loaded ${samples.length} real-world sample filaments!`);
+        Toast.success(`Loaded ${samples.length} curated real-world filaments! 🎨`);
+    },
+    
+    /**
+     * Duplicate a filament
+     */
+    duplicateFilament(id) {
+        const original = this.filaments.find(f => f.id === id);
+        if (!original) return;
+        
+        const duplicate = {
+            brand: original.brand,
+            material: original.material,
+            colorName: `${original.colorName} (Copy)`,
+            hexColor: original.hexColor,
+            source: 'manual'
+        };
+        
+        this.addFilament(duplicate);
+        Toast.success(`Duplicated ${original.colorName}`);
     },
 
     /**

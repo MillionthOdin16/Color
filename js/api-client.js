@@ -28,6 +28,11 @@ const FilamentAPI = {
             { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'White', hexColor: '#F5F5F5' },
             { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Black', hexColor: '#1C1C1C' },
             { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Grey', hexColor: '#808080' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Light Blue', hexColor: '#87CEEB' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Teal', hexColor: '#008080' },
+            { brand: 'Bambu Lab', material: 'PLA Basic', colorName: 'Brown', hexColor: '#8B4513' },
+            { brand: 'Bambu Lab', material: 'PLA Matte', colorName: 'Matte Black', hexColor: '#2B2B2B' },
+            { brand: 'Bambu Lab', material: 'PLA Matte', colorName: 'Matte White', hexColor: '#E8E8E8' },
             
             // Polymaker PolyLite
             { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Red', hexColor: '#D32F2F' },
@@ -38,6 +43,9 @@ const FilamentAPI = {
             { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Purple', hexColor: '#7B1FA2' },
             { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'White', hexColor: '#FAFAFA' },
             { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Black', hexColor: '#212121' },
+            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Grey', hexColor: '#757575' },
+            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Teal', hexColor: '#00897B' },
+            { brand: 'Polymaker', material: 'PolyLite PLA', colorName: 'Army Green', hexColor: '#4B5320' },
             
             // Hatchbox PLA
             { brand: 'Hatchbox', material: 'PLA', colorName: 'Red', hexColor: '#C62828' },
@@ -50,6 +58,12 @@ const FilamentAPI = {
             { brand: 'Hatchbox', material: 'PLA', colorName: 'Black', hexColor: '#000000' },
             { brand: 'Hatchbox', material: 'PLA', colorName: 'Cyan', hexColor: '#00BCD4' },
             { brand: 'Hatchbox', material: 'PLA', colorName: 'Magenta', hexColor: '#C2185B' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'Light Grey', hexColor: '#BDBDBD' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'Light Pink', hexColor: '#FFB6C1' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'Light Blue', hexColor: '#ADD8E6' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'Brown', hexColor: '#6D4C41' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'True Red', hexColor: '#E53935' },
+            { brand: 'Hatchbox', material: 'PLA', colorName: 'True Blue', hexColor: '#1E88E5' },
             
             // Prusament PLA
             { brand: 'Prusament', material: 'PLA', colorName: 'Orange', hexColor: '#FF8C00' },
@@ -57,6 +71,10 @@ const FilamentAPI = {
             { brand: 'Prusament', material: 'PLA', colorName: 'Prusa Orange', hexColor: '#FF6B35' },
             { brand: 'Prusament', material: 'PLA', colorName: 'Azure Blue', hexColor: '#0077BE' },
             { brand: 'Prusament', material: 'PLA', colorName: 'Lime Green', hexColor: '#9ACD32' },
+            { brand: 'Prusament', material: 'PLA', colorName: 'Mystic Green', hexColor: '#28B463' },
+            { brand: 'Prusament', material: 'PLA', colorName: 'Royal Blue', hexColor: '#4169E1' },
+            { brand: 'Prusament', material: 'PLA', colorName: 'Lipstick Red', hexColor: '#DC143C' },
+            { brand: 'Prusament', material: 'PLA', colorName: 'Vanilla White', hexColor: '#FFF8DC' },
             
             // eSUN PLA+
             { brand: 'eSUN', material: 'PLA+', colorName: 'Red', hexColor: '#DC143C' },
@@ -67,6 +85,62 @@ const FilamentAPI = {
             { brand: 'eSUN', material: 'PLA+', colorName: 'Purple', hexColor: '#9370DB' },
             { brand: 'eSUN', material: 'PLA+', colorName: 'White', hexColor: '#F8F8FF' },
             { brand: 'eSUN', material: 'PLA+', colorName: 'Black', hexColor: '#0A0A0A' },
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Grey', hexColor: '#808080' },
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Pink', hexColor: '#FFC0CB' },
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Light Blue', hexColor: '#87CEFA' },
+            { brand: 'eSUN', material: 'PLA+', colorName: 'Brown', hexColor: '#A0522D' },
+            
+            // Overture PLA
+            { brand: 'Overture', material: 'PLA', colorName: 'Red', hexColor: '#FF0000' },
+            { brand: 'Overture', material: 'PLA', colorName: 'Orange', hexColor: '#FFA500' },
+            { brand: 'Overture', material: 'PLA', colorName: 'Yellow', hexColor: '#FFFF00' },
+            { brand: 'Overture', material: 'PLA', colorName: 'Green', hexColor: '#008000' },
+            { brand: 'Overture', material: 'PLA', colorName: 'Blue', hexColor: '#0000FF' },
+            { brand: 'Overture', material: 'PLA', colorName: 'Purple', hexColor: '#800080' },
+            { brand: 'Overture', material: 'PLA', colorName: 'White', hexColor: '#FFFFFF' },
+            { brand: 'Overture', material: 'PLA', colorName: 'Black', hexColor: '#000000' },
+            { brand: 'Overture', material: 'PLA', colorName: 'Space Grey', hexColor: '#4A4A4A' },
+            { brand: 'Overture', material: 'PLA', colorName: 'Matte Black', hexColor: '#1A1A1A' },
+            
+            // Sunlu PLA+
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Red', hexColor: '#E31837' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Orange', hexColor: '#FF8800' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Yellow', hexColor: '#FFE135' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Green', hexColor: '#00A550' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Blue', hexColor: '#0055AA' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Purple', hexColor: '#663399' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'White', hexColor: '#F5F5F5' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Black', hexColor: '#000000' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Grey', hexColor: '#888888' },
+            { brand: 'Sunlu', material: 'PLA+', colorName: 'Pink', hexColor: '#FF1493' },
+            
+            // 3D Solutech
+            { brand: '3D Solutech', material: 'PLA', colorName: 'Real Red', hexColor: '#D0312D' },
+            { brand: '3D Solutech', material: 'PLA', colorName: 'Real Orange', hexColor: '#FF6A00' },
+            { brand: '3D Solutech', material: 'PLA', colorName: 'Real Yellow', hexColor: '#FFDA1A' },
+            { brand: '3D Solutech', material: 'PLA', colorName: 'Real Green', hexColor: '#2E7D32' },
+            { brand: '3D Solutech', material: 'PLA', colorName: 'Real Blue', hexColor: '#1976D2' },
+            { brand: '3D Solutech', material: 'PLA', colorName: 'Real Purple', hexColor: '#6A1B9A' },
+            { brand: '3D Solutech', material: 'PLA', colorName: 'Real White', hexColor: '#FAFAFA' },
+            { brand: '3D Solutech', material: 'PLA', colorName: 'Real Black', hexColor: '#212121' },
+            
+            // MatterHackers PRO PLA
+            { brand: 'MatterHackers', material: 'PRO PLA', colorName: 'Red', hexColor: '#C41E3A' },
+            { brand: 'MatterHackers', material: 'PRO PLA', colorName: 'Orange', hexColor: '#FF6A00' },
+            { brand: 'MatterHackers', material: 'PRO PLA', colorName: 'Yellow', hexColor: '#FFED00' },
+            { brand: 'MatterHackers', material: 'PRO PLA', colorName: 'Green', hexColor: '#00A86B' },
+            { brand: 'MatterHackers', material: 'PRO PLA', colorName: 'Blue', hexColor: '#0072CE' },
+            { brand: 'MatterHackers', material: 'PRO PLA', colorName: 'Purple', hexColor: '#663399' },
+            { brand: 'MatterHackers', material: 'PRO PLA', colorName: 'White', hexColor: '#FFFFFF' },
+            { brand: 'MatterHackers', material: 'PRO PLA', colorName: 'Black', hexColor: '#000000' },
+            
+            // CC3D Silk PLA
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Gold', hexColor: '#FFD700' },
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Silver', hexColor: '#C0C0C0' },
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Copper', hexColor: '#B87333' },
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Rainbow', hexColor: '#FF6B9D' },
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Red', hexColor: '#DC143C' },
+            { brand: 'CC3D', material: 'Silk PLA', colorName: 'Silk Blue', hexColor: '#4169E1' },
         ];
     },
 
@@ -101,7 +175,7 @@ const FilamentAPI = {
 
         // Try API first (will likely fail due to CORS/Cloudflare)
         try {
-            const response = await fetch(`${this.BASE_URL}/swatch/?q=${encodeURIComponent(query)}`, {
+            const response = await fetch(`${this.BASE_URL}/swatch/?color_name__icontains=${encodeURIComponent(query)}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -137,8 +211,8 @@ const FilamentAPI = {
 
         return data.map(item => ({
             id: item.id || Math.random().toString(36),
-            brand: item.manufacturer || item.brand || 'Unknown',
-            material: item.filament_type || item.material || 'PLA',
+            brand: item.manufacturer?.name || item.manufacturer || item.brand || 'Unknown',
+            material: item.filament_type?.name || item.filament_type || item.material || 'PLA',
             colorName: item.color_name || item.name || 'Unknown',
             hexColor: item.hex_color || this.extractHexColor(item),
             source: 'api'

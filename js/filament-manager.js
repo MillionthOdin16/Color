@@ -317,11 +317,20 @@ const FilamentManager = {
             const results = await FilamentAPI.searchFilaments(query);
 
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #94a3b8;">No results found</div>';
+                resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #94a3b8;">No results found. Try manual entry below.</div>';
                 return;
             }
 
             resultsContainer.innerHTML = '';
+            
+            // Show info badge if using local database
+            const usingLocal = results.length > 0 && results[0].source === 'local';
+            if (usingLocal) {
+                const infoBanner = document.createElement('div');
+                infoBanner.style.cssText = 'padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; font-size: 0.875rem; color: #94a3b8;';
+                infoBanner.innerHTML = '💡 Showing results from local database (120+ colors)';
+                resultsContainer.appendChild(infoBanner);
+            }
 
             results.forEach(result => {
                 const item = document.createElement('div');
@@ -344,8 +353,7 @@ const FilamentManager = {
             });
         } catch (error) {
             console.error('Search error:', error);
-            resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #ef4444;">Unable to search. Please check your connection or try manual entry.</div>';
-            Toast.error('Search failed. Try manual entry instead.');
+            resultsContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #ef4444;">Unable to search. Please try manual entry below.</div>';
         }
     },
 

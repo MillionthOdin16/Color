@@ -170,7 +170,7 @@ const FilamentManager = {
             return;
         }
 
-        // Save current state to redo stack
+        // Save current state to redo stack before undoing
         const currentState = {
             filaments: JSON.parse(JSON.stringify(this.filaments)),
             activeFilaments: new Set(this.activeFilaments)
@@ -201,8 +201,12 @@ const FilamentManager = {
             return;
         }
 
-        // Save current state to undo stack
-        this.saveToUndoStack();
+        // Save current state to undo stack before redoing
+        const currentState = {
+            filaments: JSON.parse(JSON.stringify(this.filaments)),
+            activeFilaments: new Set(this.activeFilaments)
+        };
+        this.undoStack.push(currentState);
 
         // Restore redo state
         const redoState = this.redoStack.pop();
@@ -220,12 +224,9 @@ const FilamentManager = {
     },
 
     /**
-     * Add filament
+     * Add filament (internal - no undo tracking)
      */
-    addFilament(filament, showToast = true) {
-        // Save state for undo
-        this.saveToUndoStack();
-        
+    _addFilamentInternal(filament, showToast = true) {
         filament.id = filament.id || `fil-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         this.filaments.push(filament);
         this.activeFilaments.add(filament.id);
@@ -240,6 +241,16 @@ const FilamentManager = {
         if (this.onUpdate) {
             this.onUpdate();
         }
+    },
+
+    /**
+     * Add filament (with undo tracking)
+     */
+    addFilament(filament, showToast = true) {
+        // Save state for undo
+        this.saveToUndoStack();
+        
+        this._addFilamentInternal(filament, showToast);
     },
 
     /**
@@ -683,7 +694,7 @@ const FilamentManager = {
                     );
                     
                     if (!exists) {
-                        this.addFilament(filament, false); // Don't show toast for each
+                        this._addFilamentInternal(filament, false); // Don't show toast or track undo for each
                         imported++;
                     } else {
                         duplicates++;

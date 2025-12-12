@@ -280,6 +280,9 @@ const App = {
 
             // Hide loading state
             document.getElementById('loading-state')?.classList.remove('visible');
+
+            // Show pending shared recipe if any
+            this.showPendingSharedRecipe();
         }, 50);
     },
 
@@ -684,34 +687,44 @@ const App = {
                 
                 // Validate recipe data
                 if (recipeData.filaments && recipeData.percentages && recipeData.color) {
-                    // Show a toast notification
-                    Toast.success('Loaded shared recipe from URL!');
-                    
-                    // Wait a bit for combinations to generate, then show recipe
-                    setTimeout(() => {
-                        // Try to find matching combination
-                        const matchingCombo = this.combinations.find(c => c.color === recipeData.color);
-                        
-                        if (matchingCombo) {
-                            this.showRecipe(matchingCombo);
-                        } else {
-                            // Create a temporary combo object from the URL data
-                            const tempCombo = {
-                                id: 'shared',
-                                type: `${recipeData.filaments.length}-way`,
-                                color: recipeData.color,
-                                filaments: recipeData.filaments,
-                                percentages: recipeData.percentages,
-                                recipe: recipeData.recipe
-                            };
-                            this.showRecipe(tempCombo);
-                        }
-                    }, 1000);
+                    // Store recipe data for later display
+                    this._pendingSharedRecipe = recipeData;
                 }
             } catch (error) {
                 console.error('Failed to parse shared recipe:', error);
                 Toast.error('Failed to load shared recipe');
             }
+        }
+    },
+
+    /**
+     * Show pending shared recipe if combinations are ready
+     */
+    showPendingSharedRecipe() {
+        if (!this._pendingSharedRecipe) return;
+        
+        const recipeData = this._pendingSharedRecipe;
+        this._pendingSharedRecipe = null; // Clear pending recipe
+        
+        // Show success toast now that we're actually displaying it
+        Toast.success('Loaded shared recipe from URL!');
+        
+        // Try to find matching combination
+        const matchingCombo = this.combinations.find(c => c.color === recipeData.color);
+        
+        if (matchingCombo) {
+            this.showRecipe(matchingCombo);
+        } else {
+            // Create a temporary combo object from the URL data
+            const tempCombo = {
+                id: 'shared',
+                type: `${recipeData.filaments.length}-way`,
+                color: recipeData.color,
+                filaments: recipeData.filaments,
+                percentages: recipeData.percentages,
+                recipe: recipeData.recipe
+            };
+            this.showRecipe(tempCombo);
         }
     },
 
